@@ -123,8 +123,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
       name: mode.charAt(0).toUpperCase() + mode.slice(1),
       emissions: filteredVehicles
         .filter(v => v.mode === mode)
-        .reduce((acc, v) => acc + v.co2e, 0)
-        .toFixed(2),
+        .reduce((acc, v) => acc + v.co2e, 0),
     }));
   }, [filteredVehicles]);
 

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -53,7 +54,7 @@ export function EmissionsChart<T extends object>({
               <Legend iconSize={10} />
               {dataKeys.map((key, index) => (
                 <Bar
-                  key={key as string}
+                  key={`${title}-${key as string}-${index}`}
                   dataKey={key as string}
                   fill={colors[index % colors.length]}
                   radius={[4, 4, 0, 0]}
