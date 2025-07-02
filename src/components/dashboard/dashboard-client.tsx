@@ -90,7 +90,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
 
 
   return (
-    <div className="h-full w-full">
+    <div className="relative h-full w-full">
       <div className="absolute inset-0 z-0">
         <MapView
           mapboxToken={mapboxToken}

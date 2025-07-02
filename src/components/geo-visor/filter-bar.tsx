@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -6,7 +7,7 @@ import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Bot, Search } from 'lucide-react';
+import { Bot } from 'lucide-react';
 import { vehicles } from '@/lib/data';
 import type { Mode, Region, Carrier } from '@/types';
 import { useUser } from '@/hooks/use-user';
@@ -54,8 +55,8 @@ export function FilterBar({ filters, setFilters, onAiSearch }: FilterBarProps) {
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 shadow-sm md:flex-row md:items-center">
-      <div className="grid flex-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 shadow-sm">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Select value={filters.mode} onValueChange={(v) => handleFilterChange('mode', v)}>
           <SelectTrigger><SelectValue placeholder="Mode" /></SelectTrigger>
           <SelectContent>{modes.map(m => <SelectItem key={m} value={m} className="capitalize">{m}</SelectItem>)}</SelectContent>
@@ -70,7 +71,7 @@ export function FilterBar({ filters, setFilters, onAiSearch }: FilterBarProps) {
             <SelectContent>{carriers.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
           </Select>
         )}
-        <div className="space-y-2">
+        <div className="space-y-2 sm:col-span-2">
           <Label htmlFor="emissions-slider" className="text-sm">Max CO2e: {filters.emissions} tons</Label>
           <Slider
             id="emissions-slider"
@@ -82,9 +83,9 @@ export function FilterBar({ filters, setFilters, onAiSearch }: FilterBarProps) {
           />
         </div>
       </div>
-      <div className="h-8 w-px bg-border hidden md:block mx-4" />
+      <div className="my-2 h-px w-full bg-border" />
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSearchSubmit)} className="flex w-full gap-2 md:w-auto">
+        <form onSubmit={form.handleSubmit(handleSearchSubmit)} className="flex w-full flex-col gap-2 sm:flex-row">
           <FormField
             control={form.control}
             name="query"

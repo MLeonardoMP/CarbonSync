@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -128,7 +129,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
   }, [result]);
 
   return (
-    <div className="h-full w-full">
+    <div className="relative h-full w-full">
       <div className="absolute inset-0 z-0">
         <Map
           mapboxAccessToken={mapboxToken}
