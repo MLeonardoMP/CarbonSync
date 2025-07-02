@@ -20,7 +20,7 @@ const JourneyLegSchema = z.object({
   cargoWeightTons: z.number().optional().describe('The weight of the cargo in tons.'),
 });
 
-export const PlanLogisticsJourneyInputSchema = z.object({
+const PlanLogisticsJourneyInputSchema = z.object({
   legs: z.array(JourneyLegSchema).describe('The list of legs in the user-defined journey.'),
   priority: z
     .enum(['emissions', 'cost', 'speed'])
