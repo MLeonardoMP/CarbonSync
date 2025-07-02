@@ -82,9 +82,15 @@ export function BottomNav() {
 
         <div className="flex items-center gap-4">
           <div className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
-            <span className="font-medium">Powered by</span>
-            <GearsmapLogo className="h-5 w-5" />
-            <span className="font-semibold text-foreground">GearsMap</span>
+             <a
+              href="https://gearsmap.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 opacity-80 transition-opacity hover:opacity-100"
+            >
+              <span className="font-medium">Powered by</span>
+              <GearsmapLogo className="h-5 w-5" />
+            </a>
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />

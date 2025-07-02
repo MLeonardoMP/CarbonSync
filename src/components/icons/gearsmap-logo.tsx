@@ -8,13 +8,13 @@ export function GearsmapLogo(props: React.SVGProps<SVGSVGElement>) {
     >
       <path
         d="M52.7,46.2c-4.3-5.2-12-8.3-20.7-8.3c-11.8,0-21.4,5.4-21.4,12.1c0,6.7,9.6,12.1,21.4,12.1c8.1,0,15.1-2.6,19.2-6.8"
-        stroke="#808080"
+        stroke="currentColor"
         strokeWidth="3"
         strokeMiterlimit="10"
       />
       <path
         d="M49.6,40.1c-2.9-3.5-8.1-5.6-13.9-5.6c-7.9,0-14.4,3.6-14.4,8.1c0,4.5,6.4,8.1,14.4,8.1c5.4,0,10.2-1.8,12.9-4.6"
-        stroke="#808080"
+        stroke="currentColor"
         strokeWidth="3"
         strokeMiterlimit="10"
       />
