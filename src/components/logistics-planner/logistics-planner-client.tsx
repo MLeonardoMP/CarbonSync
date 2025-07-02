@@ -1,11 +1,11 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Map, { Source, Layer, Marker } from 'react-map-gl';
+import Map, { Source, Layer, Marker, type MapRef } from 'react-map-gl';
 import type { Feature, FeatureCollection, LineString } from 'geojson';
 import { useTheme } from 'next-themes';
 
@@ -48,6 +48,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const mapRef = useRef<MapRef>(null);
 
   const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
 
@@ -85,6 +86,13 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
       </div>
     );
   }
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!isSidebarOpen);
+    setTimeout(() => {
+        mapRef.current?.resize();
+    }, 300); // match transition duration
+  };
 
   const onSubmit = async (values: PlannerFormValues) => {
     setIsLoading(true);
@@ -252,13 +260,14 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
         <Button
             variant="secondary"
             size="icon"
-            onClick={() => setSidebarOpen(!isSidebarOpen)}
+            onClick={toggleSidebar}
             className="absolute top-1/2 -translate-y-1/2 left-2 z-10 h-6 w-6 rounded-full shadow-md"
         >
             {isSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             <span className="sr-only">Toggle sidebar</span>
         </Button>
         <Map
+          ref={mapRef}
           key={mapStyle}
           mapboxAccessToken={mapboxToken}
           initialViewState={{ longitude: -30, latitude: 35, zoom: 1.5 }}

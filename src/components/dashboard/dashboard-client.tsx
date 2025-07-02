@@ -1,10 +1,11 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import type { MapRef } from 'react-map-gl';
 
 import { vehicles } from '@/lib/data';
 import type { Vehicle, Mode, Region, Carrier } from '@/types';
@@ -36,6 +37,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
   const { toast } = useToast();
   const [popoverOpen, setPopoverOpen] = React.useState(false);
   const [isSidebarOpen, setSidebarOpen] = React.useState(true);
+  const mapRef = useRef<MapRef>(null);
 
   const form = useForm<z.infer<typeof searchSchema>>({
     resolver: zodResolver(searchSchema),
@@ -68,6 +70,13 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
         description: 'Could not process the natural language query.',
       });
     }
+  };
+  
+  const toggleSidebar = () => {
+    setSidebarOpen(!isSidebarOpen);
+    setTimeout(() => {
+        mapRef.current?.resize();
+    }, 300); // match transition duration
   };
 
   const filteredVehicles = useMemo(() => {
@@ -194,13 +203,14 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
          <Button
             variant="secondary"
             size="icon"
-            onClick={() => setSidebarOpen(!isSidebarOpen)}
+            onClick={toggleSidebar}
             className="absolute top-1/2 -translate-y-1/2 left-2 z-10 h-6 w-6 rounded-full shadow-md"
           >
             {isSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
             <span className="sr-only">Toggle sidebar</span>
         </Button>
          <MapView
+          ref={mapRef}
           mapboxToken={mapboxToken}
           vehicles={filteredVehicles}
           onVehicleClick={setSelectedVehicle}
