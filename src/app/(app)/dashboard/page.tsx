@@ -8,7 +8,7 @@ export default function DashboardPage() {
 
     if (!mapboxToken || mapboxToken === "YOUR_MAPBOX_ACCESS_TOKEN") {
         return (
-            <div className="flex h-[calc(100vh-theme(spacing.24))] w-full items-center justify-center">
+            <div className="flex h-full w-full items-center justify-center p-4">
                 <div className="flex flex-col items-center gap-6 rounded-xl border bg-card p-8 text-center shadow-lg max-w-lg">
                     <div className="rounded-full border-4 border-primary/20 bg-primary/10 p-4">
                          <MapPin className="h-12 w-12 text-primary" />
