@@ -26,8 +26,8 @@ export function EmissionsChart<T extends object>({
       </CardHeader>
       <CardContent>
         <div className="h-[300px]">
-          <ResponsiveContainer width="100%" height="100%" key={title}>
-            <BarChart data={data}>
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={data} key={title}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} />
               <XAxis
                 dataKey={xAxisKey as string}
