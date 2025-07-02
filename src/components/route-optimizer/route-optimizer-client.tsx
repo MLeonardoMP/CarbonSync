@@ -134,7 +134,7 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
                                 'case',
                                 ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
                                 'hsl(var(--primary))',
-                                '#888'
+                                'hsl(var(--border))'
                             ],
                             'line-width': [
                                 'case',
@@ -155,13 +155,13 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
             </Map>
         </div>
         
-        <aside className="absolute left-0 top-0 z-10 h-full w-full max-w-sm overflow-y-auto border-r border-border bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
+        <aside className="absolute left-0 top-0 z-10 h-full w-full max-w-sm overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
             <ScrollArea className="h-full">
-                <div className="flex flex-col gap-6 pr-6">
+                <div className="flex flex-col gap-6 pr-4">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
-                            <Bot className="h-5 w-5" />
+                            <Bot className="h-5 w-5 text-accent" />
                             Route Optimizer
                             </CardTitle>
                             <CardDescription>Enter details to find the most efficient routes.</CardDescription>
@@ -244,7 +244,7 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
                             <Card 
                                 key={i} 
                                 onClick={() => setSelectedSuggestion(s)}
-                                className={cn("cursor-pointer transition-all", selectedSuggestion?.routeDescription === s.routeDescription ? "border-primary ring-2 ring-primary" : "border-border")}
+                                className={cn("cursor-pointer transition-all", selectedSuggestion?.routeDescription === s.routeDescription ? "border-primary ring-2 ring-ring" : "border-border hover:border-primary/50")}
                             >
                             <CardHeader>
                                 <CardTitle>Option {i + 1}</CardTitle>
@@ -252,21 +252,21 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
                             </CardHeader>
                             <CardContent className="grid gap-4 sm:grid-cols-3">
                                 <div className="flex items-center gap-2">
-                                <Wind className="h-5 w-5 text-primary" />
+                                <Wind className="h-5 w-5 text-accent" />
                                 <div>
                                     <p className="text-sm font-medium">{s.estimatedCO2eEmissions} kg</p>
                                     <p className="text-xs text-muted-foreground">CO2e Emissions</p>
                                 </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                <Clock className="h-5 w-5 text-primary" />
+                                <Clock className="h-5 w-5 text-accent" />
                                 <div>
                                     <p className="text-sm font-medium">{s.estimatedTime}</p>
                                     <p className="text-xs text-muted-foreground">Est. Time</p>
                                 </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                <DollarSign className="h-5 w-5 text-primary" />
+                                <DollarSign className="h-5 w-5 text-accent" />
                                 <div>
                                     <p className="text-sm font-medium">${s.estimatedCost.toLocaleString()}</p>
                                     <p className="text-xs text-muted-foreground">Est. Cost</p>

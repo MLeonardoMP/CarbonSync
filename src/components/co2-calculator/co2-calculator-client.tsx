@@ -108,23 +108,23 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
           {result?.emissionBreakdown.map((leg, i) => (
             <React.Fragment key={i}>
               <Marker longitude={leg.originCoordinates.lon} latitude={leg.originCoordinates.lat}>
-                <MapPin className="h-6 w-6 text-primary" fill="hsl(var(--primary))" stroke="hsl(var(--background))"/>
+                <MapPin className="h-6 w-6 text-primary" fill="hsl(var(--accent))" stroke="hsl(var(--background))"/>
               </Marker>
               <Marker longitude={leg.destinationCoordinates.lon} latitude={leg.destinationCoordinates.lat}>
-                <MapPin className="h-6 w-6 text-primary" fill="hsl(var(--primary))" stroke="hsl(var(--background))"/>
+                <MapPin className="h-6 w-6 text-primary" fill="hsl(var(--accent))" stroke="hsl(var(--background))"/>
               </Marker>
             </React.Fragment>
           ))}
         </Map>
       </div>
 
-      <aside className="absolute left-0 top-0 z-10 h-full w-full max-w-sm overflow-y-auto border-r border-border bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
+      <aside className="absolute left-0 top-0 z-10 h-full w-full max-w-sm overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
         <ScrollArea className="h-full">
-            <div className="flex flex-col gap-6 pr-6">
+            <div className="flex flex-col gap-6 pr-4">
                 <Card>
                     <CardHeader>
                     <CardTitle className="flex items-center gap-2">
-                        <Calculator className="h-5 w-5" />
+                        <Calculator className="h-5 w-5 text-accent" />
                         CO2 Emissions Calculator
                     </CardTitle>
                     <CardDescription>
@@ -257,14 +257,14 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
                                             <p className="font-semibold">{leg.legDescription}</p>
                                             <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-3">
                                                 <div className="flex items-center gap-2 text-sm">
-                                                    <Wind className="h-4 w-4 text-primary" />
+                                                    <Wind className="h-4 w-4 text-accent" />
                                                     <div>
                                                         <p className="font-medium">{leg.estimatedCO2eEmissions.toLocaleString()} kg</p>
                                                         <p className="text-xs text-muted-foreground">CO2e</p>
                                                     </div>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-sm">
-                                                    <Route className="h-4 w-4 text-primary" />
+                                                    <Route className="h-4 w-4 text-accent" />
                                                     <div>
                                                         <p className="font-medium">{leg.distanceKm.toLocaleString()} km</p>
                                                         <p className="text-xs text-muted-foreground">Distance</p>
@@ -272,7 +272,7 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
                                                 </div>
                                                 { leg.distanceKm > 0 &&
                                                 <div className="flex items-center gap-2 text-sm">
-                                                    <TrendingUp className="h-4 w-4 text-primary" />
+                                                    <TrendingUp className="h-4 w-4 text-accent" />
                                                     <div>
                                                         <p className="font-medium">{(leg.estimatedCO2eEmissions / leg.distanceKm).toFixed(2)} kg/km</p>
                                                         <p className="text-xs text-muted-foreground">Intensity</p>

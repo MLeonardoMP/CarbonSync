@@ -99,12 +99,12 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
         />
       </div>
 
-      <aside className="absolute left-0 top-0 z-10 h-full w-full max-w-sm overflow-y-auto border-r border-border bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
+      <aside className="absolute left-0 top-0 z-10 h-full w-full max-w-sm overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
         <ScrollArea className="h-full">
-            <div className="flex flex-col gap-6 pr-6">
-                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="flex flex-col gap-6 pr-4">
+                <div className="flex items-center justify-between gap-4">
                     <h2 className="text-2xl font-bold tracking-tight">
-                    Welcome, <span className="capitalize">{role}</span>!
+                        Dashboard
                     </h2>
                     <div className="flex items-center space-x-2">
                         <Select defaultValue="month">
@@ -154,7 +154,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                     title="Emissions by Transport Mode"
                     xAxisKey="name"
                     dataKeys={['emissions']}
-                    colors={['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondary))']}
+                    colors={['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))']}
                 />
                 {role !== 'carrier' && (
                     <EmissionsChart
@@ -162,7 +162,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                         title="Emissions by Carrier"
                         xAxisKey="name"
                         dataKeys={['emissions']}
-                        colors={['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondary))', '#a855f7']}
+                        colors={['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))']}
                     />
                 )}
             </div>
