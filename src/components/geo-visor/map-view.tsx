@@ -1,6 +1,8 @@
 'use client';
 
+import React from 'react';
 import Map, { Marker } from 'react-map-gl';
+import { useTheme } from 'next-themes';
 import { VehicleMarker } from './vehicle-marker';
 import type { Vehicle } from '@/types';
 
@@ -11,8 +13,20 @@ interface MapViewProps {
 }
 
 export function MapView({ mapboxToken, vehicles, onVehicleClick }: MapViewProps) {
+  const { resolvedTheme } = useTheme();
+  const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
+
+  React.useEffect(() => {
+    // A slight delay to prevent map flashing during theme change
+    const timer = setTimeout(() => {
+      setMapStyle(resolvedTheme === 'dark' ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11');
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [resolvedTheme]);
+
   return (
     <Map
+      key={mapStyle} // Force map re-render on style change
       mapboxAccessToken={mapboxToken}
       initialViewState={{
         longitude: -20,
@@ -20,7 +34,7 @@ export function MapView({ mapboxToken, vehicles, onVehicleClick }: MapViewProps)
         zoom: 2,
       }}
       style={{ width: '100%', height: '100%' }}
-      mapStyle="mapbox://styles/mapbox/dark-v11"
+      mapStyle={mapStyle}
     >
       {vehicles.map((vehicle) => (
         <Marker
@@ -29,7 +43,6 @@ export function MapView({ mapboxToken, vehicles, onVehicleClick }: MapViewProps)
           latitude={vehicle.position.lat}
           anchor="center"
           onClick={(e) => {
-            // stop event propagation to prevent map click event
             e.originalEvent.stopPropagation();
             onVehicleClick(vehicle);
           }}

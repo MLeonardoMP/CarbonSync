@@ -20,6 +20,7 @@ import type { UserRole, Carrier } from '@/types';
 import { Logo } from '@/components/icons/logo';
 import { cn } from '@/lib/utils';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { ThemeToggle } from './theme-toggle';
 
 const carriers: Carrier[] = ['EcoHaul', 'SwiftTrans', 'AquaGlide', 'RailForward'];
 
@@ -110,6 +111,7 @@ export function Header() {
             </Sheet>
          </div>
 
+        <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="secondary" size="icon" className="rounded-full">

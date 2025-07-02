@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import Map, { Source, Layer, Marker } from 'react-map-gl';
 import type { Feature, FeatureCollection, LineString } from 'geojson';
+import { useTheme } from 'next-themes';
 
 import { planLogisticsJourney, type PlanLogisticsJourneyOutput } from '@/ai/flows/plan-logistics-journey';
 import { Button } from '@/components/ui/button';
@@ -40,10 +41,21 @@ type Suggestion = PlanLogisticsJourneyOutput['suggestedRoutes'][0];
 
 export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string }) {
   const { role } = useUser();
+  const { resolvedTheme } = useTheme();
   const [result, setResult] = useState<PlanLogisticsJourneyOutput | null>(null);
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+        setMapStyle(resolvedTheme === 'dark' ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11');
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [resolvedTheme]);
+
 
   const form = useForm<PlannerFormValues>({
     resolver: zodResolver(plannerSchema),
@@ -61,7 +73,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
   if (role === 'carrier') {
     return (
       <div className="flex h-full w-full items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-4 rounded-lg border bg-card p-12 text-center shadow-sm">
+        <div className="flex flex-col items-center gap-4 rounded-sm border bg-card p-12 text-center shadow-sm">
           <Lock className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">Access Denied</h3>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -180,7 +192,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                         <Card>
                             <CardHeader><CardTitle>Your Route Calculation</CardTitle></CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="text-center rounded-lg bg-muted p-4">
+                                <div className="text-center rounded-sm bg-muted p-4">
                                     <p className="text-sm text-muted-foreground">Total Estimated Emissions</p>
                                     <p className="text-3xl font-bold text-primary">
                                         {result.calculatedRoute.totalCO2eEmissions.toLocaleString()} kg
@@ -188,7 +200,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                                 </div>
                                 <p className="font-semibold text-sm">Emissions Breakdown</p>
                                 {result.calculatedRoute.emissionBreakdown.map((leg, i) => (
-                                    <div key={`breakdown-${i}`} className="rounded-md border p-3">
+                                    <div key={`breakdown-${i}`} className="rounded-sm border p-3">
                                         <p className="font-semibold text-sm">{leg.legDescription}</p>
                                         <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                                             <div className="flex items-center gap-2 text-xs"><Wind className="h-4 w-4 text-accent" /><span>{leg.estimatedCO2eEmissions.toLocaleString()} kg CO2e</span></div>
@@ -205,7 +217,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                           <CardContent className="space-y-4">
                             {result.suggestedRoutes.length === 0 && <p className="text-sm text-muted-foreground">No alternative routes could be generated.</p>}
                             {result.suggestedRoutes.map((s, i) => (
-                                <Card key={`suggestion-${i}`} onClick={() => setSelectedSuggestion(s)} className={cn("cursor-pointer transition-colors", selectedSuggestion?.routeDescription === s.routeDescription ? "border-primary bg-muted/40" : "border-border hover:border-primary/60")}>
+                                <Card key={`suggestion-${i}`} onClick={() => setSelectedSuggestion(s)} className={cn("cursor-pointer transition-shadow", selectedSuggestion?.routeDescription === s.routeDescription ? "ring-2 ring-primary" : "ring-1 ring-transparent hover:ring-1 hover:ring-primary/60")}>
                                 <CardHeader className="p-4"><CardTitle className="text-base">Option {i + 1}</CardTitle><p className="text-xs text-muted-foreground">{s.routeDescription}</p></CardHeader>
                                 <CardContent className="grid gap-3 p-4 pt-0 sm:grid-cols-3">
                                     <div className="flex items-center gap-2"><Wind className="h-4 w-4 text-accent" /><div><p className="text-xs font-medium">{s.estimatedCO2eEmissions} kg</p><p className="text-xs text-muted-foreground">CO2e</p></div></div>
@@ -220,7 +232,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                     )}
 
                     {!isLoading && !result && !error && (
-                        <div className="flex h-32 items-center justify-center rounded-lg border-2 border-dashed bg-card text-center">
+                        <div className="flex h-32 items-center justify-center rounded-sm border-2 border-dashed bg-card text-center">
                             <p className="text-muted-foreground">Results will be displayed here.</p>
                         </div>
                     )}
@@ -230,13 +242,13 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
       </aside>
       <main className="relative flex-1">
         <Map
+          key={mapStyle}
           mapboxAccessToken={mapboxToken}
           initialViewState={{ longitude: -30, latitude: 35, zoom: 1.5 }}
-          mapStyle="mapbox://styles/mapbox/dark-v11"
+          mapStyle={mapStyle}
         >
           {geoJsonData && (
             <Source id="route-data" type="geojson" data={geoJsonData}>
-              {/* Layer for user's defined route */}
               <Layer
                 id="user-route-lines"
                 type="line"
@@ -248,7 +260,6 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                   'line-opacity': 0.8
                 }}
               />
-              {/* Layer for suggested routes */}
               <Layer
                   id="suggestion-routes-lines"
                   type="line"
@@ -263,8 +274,8 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                       'line-width': [
                           'case',
                           ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
-                          4,
-                          2
+                          5,
+                          3
                       ],
                       'line-opacity': [
                           'case',
