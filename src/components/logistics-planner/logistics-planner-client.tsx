@@ -55,6 +55,13 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
 
   const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
   const [projection, setProjection] = React.useState<Projection['name']>('mercator');
+  const [viewState, setViewState] = React.useState({
+    longitude: -30,
+    latitude: 35,
+    zoom: 1.5,
+    pitch: 0,
+    bearing: 0,
+  });
 
   React.useEffect(() => {
     const isDefaultThemeStyle = mapStyle.includes('dark-v11') || mapStyle.includes('light-v11');
@@ -328,7 +335,8 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
           ref={mapRef}
           key={`${mapStyle}-${projection}`}
           mapboxAccessToken={mapboxToken}
-          initialViewState={{ longitude: -30, latitude: 35, zoom: 1.5 }}
+          {...viewState}
+          onMove={(evt) => setViewState(evt.viewState)}
           projection={{name: projection}}
           mapStyle={mapStyle}
         >

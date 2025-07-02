@@ -21,6 +21,13 @@ export const MapView = React.forwardRef<MapRef, MapViewProps>(
     const { resolvedTheme } = useTheme();
     const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
     const [projection, setProjection] = React.useState<Projection['name']>('mercator');
+    const [viewState, setViewState] = React.useState({
+      longitude: -20,
+      latitude: 40,
+      zoom: 2,
+      pitch: 0,
+      bearing: 0,
+    });
 
     React.useEffect(() => {
       const isDefaultThemeStyle = mapStyle.includes('dark-v11') || mapStyle.includes('light-v11');
@@ -37,11 +44,8 @@ export const MapView = React.forwardRef<MapRef, MapViewProps>(
         ref={ref}
         key={`${mapStyle}-${projection}`}
         mapboxAccessToken={mapboxToken}
-        initialViewState={{
-          longitude: -20,
-          latitude: 40,
-          zoom: 2,
-        }}
+        {...viewState}
+        onMove={(evt) => setViewState(evt.viewState)}
         projection={{ name: projection }}
         style={{ width: '100%', height: '100%' }}
         mapStyle={mapStyle}

@@ -62,6 +62,13 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
 
   const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
   const [projection, setProjection] = React.useState<Projection['name']>('mercator');
+  const [viewState, setViewState] = React.useState({
+    longitude: -98,
+    latitude: 39,
+    zoom: 3,
+    pitch: 0,
+    bearing: 0,
+  });
 
   React.useEffect(() => {
     const isDefaultThemeStyle = mapStyle.includes('dark-v11') || mapStyle.includes('light-v11');
@@ -298,7 +305,8 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
                 ref={mapRef}
                 key={`${mapStyle}-${projection}`}
                 mapboxAccessToken={mapboxToken}
-                initialViewState={{ longitude: -98, latitude: 39, zoom: 3 }}
+                {...viewState}
+                onMove={(evt) => setViewState(evt.viewState)}
                 projection={{name: projection}}
                 mapStyle={mapStyle}
             >
