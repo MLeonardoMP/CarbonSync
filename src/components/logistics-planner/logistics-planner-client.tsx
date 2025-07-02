@@ -17,7 +17,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlusCircle, Trash2, Wind, Route, MapPin, Bot, DollarSign, Clock, Lock } from 'lucide-react';
+import { PlusCircle, Trash2, Wind, Route, MapPin, Bot, DollarSign, Clock, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/use-user';
@@ -47,6 +47,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
 
   const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
 
@@ -142,8 +143,14 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
 
   return (
     <div className="flex h-[calc(100vh-theme(spacing.14))] w-full">
-      <aside className="h-full w-full shrink-0 overflow-y-auto border-r border-border/50 bg-background p-4 md:w-[420px]">
-        <ScrollArea className="h-full">
+      <aside className={cn(
+        "relative h-full shrink-0 overflow-y-auto border-r border-border/50 bg-background transition-[width,padding,border] duration-300 ease-in-out",
+        isSidebarOpen ? "w-full p-4 md:w-[420px]" : "w-0 p-0 border-transparent"
+      )}>
+        <ScrollArea className={cn(
+          "h-full transition-opacity duration-300",
+          isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}>
             <div className="flex flex-col gap-6 pr-4">
                 <Card>
                     <CardHeader>
@@ -168,7 +175,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                                   <FormField control={form.control} name={`legs.${index}.modeOfTransport`} render={({ field }) => (<FormItem><FormLabel>Transport Mode</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl><SelectContent><SelectItem value="truck">Truck</SelectItem><SelectItem value="rail">Rail</SelectItem><SelectItem value="sea">Sea</SelectItem><SelectItem value="air">Air</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
                                   <FormField control={form.control} name={`legs.${index}.cargoWeightTons`} render={({ field }) => (<FormItem><FormLabel>Weight (tons)</FormLabel><FormControl><Input type="number" placeholder="Optional" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
                                   </div>
-                                  {fields.length > 1 && (<Button type="button" variant="ghost" size="icon" className="absolute -top-2 -right-2 h-7 w-7" onClick={() => remove(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>)}
+                                  {fields.length > 1 && (<Button type="button" variant="ghost" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => remove(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>)}
                               </Card>
                               ))}
                           </div>
@@ -219,8 +226,8 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                             {result.suggestedRoutes.length === 0 && <p className="text-sm text-muted-foreground">No alternative routes could be generated.</p>}
                             {result.suggestedRoutes.map((s, i) => (
                                 <Card key={`suggestion-${i}`} onClick={() => setSelectedSuggestion(s)} className={cn("cursor-pointer transition-shadow", selectedSuggestion?.routeDescription === s.routeDescription ? "ring-2 ring-primary" : "ring-1 ring-transparent hover:ring-1 hover:ring-primary/60")}>
-                                <CardHeader className="p-4"><CardTitle className="text-base">Option {i + 1}</CardTitle><p className="text-xs text-muted-foreground">{s.routeDescription}</p></CardHeader>
-                                <CardContent className="grid gap-3 p-4 pt-0 sm:grid-cols-3">
+                                <CardHeader className="p-3"><CardTitle className="text-base">Option {i + 1}</CardTitle><p className="text-xs text-muted-foreground">{s.routeDescription}</p></CardHeader>
+                                <CardContent className="grid gap-3 p-3 pt-0 sm:grid-cols-3">
                                     <div className="flex items-center gap-2"><Wind className="h-4 w-4 text-accent" /><div><p className="text-xs font-medium">{s.estimatedCO2eEmissions} kg</p><p className="text-xs text-muted-foreground">CO2e</p></div></div>
                                     <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-accent" /><div><p className="text-xs font-medium">{s.estimatedTime}</p><p className="text-xs text-muted-foreground">Time</p></div></div>
                                     <div className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-accent" /><div><p className="text-xs font-medium">${s.estimatedCost.toLocaleString()}</p><p className="text-xs text-muted-foreground">Cost</p></div></div>
@@ -242,6 +249,15 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
         </ScrollArea>
       </aside>
       <main className="relative flex-1">
+        <Button
+            variant="secondary"
+            size="icon"
+            onClick={() => setSidebarOpen(!isSidebarOpen)}
+            className="absolute top-1/2 -translate-y-1/2 left-2 z-10 h-6 w-6 rounded-full shadow-md"
+        >
+            {isSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            <span className="sr-only">Toggle sidebar</span>
+        </Button>
         <Map
           key={mapStyle}
           mapboxAccessToken={mapboxToken}

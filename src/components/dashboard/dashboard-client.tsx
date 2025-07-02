@@ -17,13 +17,14 @@ import { EmissionsChart } from './emissions-chart';
 import { FilterBar } from '@/components/geo-visor/filter-bar';
 import { MapView } from '@/components/geo-visor/map-view';
 
-import { Truck, Ship, Leaf, Globe, Bot, Send } from 'lucide-react';
+import { Truck, Ship, Leaf, Globe, Bot, Send, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { cn } from '@/lib/utils';
 
 const searchSchema = z.object({
   query: z.string().min(3, 'Query must be at least 3 characters'),
@@ -34,6 +35,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
   const { role, carrier: userCarrier } = useUser();
   const { toast } = useToast();
   const [popoverOpen, setPopoverOpen] = React.useState(false);
+  const [isSidebarOpen, setSidebarOpen] = React.useState(true);
 
   const form = useForm<z.infer<typeof searchSchema>>({
     resolver: zodResolver(searchSchema),
@@ -112,8 +114,14 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
 
   return (
     <div className="flex h-[calc(100vh-theme(spacing.14))] w-full">
-      <aside className="h-full w-full shrink-0 overflow-y-auto border-r bg-background p-4 md:w-[420px]">
-        <ScrollArea className="h-full">
+      <aside className={cn(
+        "relative h-full shrink-0 overflow-y-auto border-r bg-background transition-[width,padding,border] duration-300 ease-in-out",
+        isSidebarOpen ? "w-full p-4 md:w-[420px]" : "w-0 p-0 border-transparent"
+      )}>
+        <ScrollArea className={cn(
+          "h-full transition-opacity duration-300",
+          isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}>
             <div className="flex flex-col gap-6 pr-4">
                 <div className="flex items-center justify-between gap-4">
                     <h2 className="text-lg font-bold tracking-tight">
@@ -183,6 +191,15 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
       </aside>
 
       <main className="relative flex-1">
+         <Button
+            variant="secondary"
+            size="icon"
+            onClick={() => setSidebarOpen(!isSidebarOpen)}
+            className="absolute top-1/2 -translate-y-1/2 left-2 z-10 h-6 w-6 rounded-full shadow-md"
+          >
+            {isSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            <span className="sr-only">Toggle sidebar</span>
+        </Button>
          <MapView
           mapboxToken={mapboxToken}
           vehicles={filteredVehicles}
@@ -195,7 +212,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                 <Button 
                     variant="secondary" 
                     size="icon" 
-                    className="absolute bottom-6 right-6 z-10 h-12 w-12 rounded-full shadow-lg"
+                    className="absolute bottom-6 right-6 z-10 h-10 w-10 rounded-full shadow-lg"
                 >
                     <Bot className="h-5 w-5" />
                     <span className="sr-only">AI Assistant</span>
