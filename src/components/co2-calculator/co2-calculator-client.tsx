@@ -23,7 +23,10 @@ const legSchema = z.object({
   origin: z.string().min(2, 'Origin is required.'),
   destination: z.string().min(2, 'Destination is required.'),
   modeOfTransport: z.enum(['truck', 'rail', 'sea', 'air']),
-  cargoWeightTons: z.coerce.number().positive('Must be a positive number').optional(),
+  cargoWeightTons: z.preprocess(
+    (val) => val === '' ? undefined : val,
+    z.coerce.number().positive('Must be a positive number').optional()
+  ),
 });
 
 const calculatorSchema = z.object({
@@ -40,7 +43,7 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
   const form = useForm<CalculatorFormValues>({
     resolver: zodResolver(calculatorSchema),
     defaultValues: {
-      legs: [{ origin: '', destination: '', modeOfTransport: 'truck' }],
+      legs: [{ origin: '', destination: '', modeOfTransport: 'truck', cargoWeightTons: '' }],
     },
   });
 
@@ -210,7 +213,7 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
                             type="button"
                             variant="outline"
                             className="w-full"
-                            onClick={() => append({ origin: '', destination: '', modeOfTransport: 'truck' })}
+                            onClick={() => append({ origin: '', destination: '', modeOfTransport: 'truck', cargoWeightTons: '' })}
                         >
                             <PlusCircle className="mr-2 h-4 w-4" />
                             Add Leg

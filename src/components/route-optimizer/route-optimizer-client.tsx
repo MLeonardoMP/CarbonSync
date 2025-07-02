@@ -38,7 +38,10 @@ const routeSchema = z.object({
   origin: z.string().min(2, 'Origin is required'),
   destination: z.string().min(2, 'Destination is required'),
   modeOfTransport: z.enum(['truck', 'rail', 'sea']),
-  cargoWeightTons: z.coerce.number().optional(),
+  cargoWeightTons: z.preprocess(
+    (val) => val === '' ? undefined : val,
+    z.coerce.number().optional()
+  ),
   priority: z.enum(['emissions', 'cost', 'speed']),
 });
 
@@ -58,6 +61,7 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
       destination: '',
       modeOfTransport: 'truck',
       priority: 'emissions',
+      cargoWeightTons: '',
     },
   });
 
