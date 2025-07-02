@@ -142,7 +142,7 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
   }, [suggestions]);
 
   return (
-    <div className="h-[calc(100vh-theme(spacing.14))] w-full flex">
+    <div className="h-full w-full flex">
        <aside className={cn(
         "relative h-full shrink-0 overflow-y-auto border-r border-border/50 bg-background transition-[width,padding,border] duration-300 ease-in-out",
         isSidebarOpen ? "w-full p-4 md:w-[420px]" : "w-0 p-0 border-transparent"
