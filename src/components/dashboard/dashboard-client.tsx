@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -20,7 +21,7 @@ import { Truck, Ship, Leaf, Globe, Bot } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 
@@ -32,7 +33,7 @@ const searchSchema = z.object({
 export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
   const { role, carrier: userCarrier } = useUser();
   const { toast } = useToast();
-  const [dialogOpen, setDialogOpen] = React.useState(false);
+  const [popoverOpen, setPopoverOpen] = React.useState(false);
 
   const form = useForm<z.infer<typeof searchSchema>>({
     resolver: zodResolver(searchSchema),
@@ -56,7 +57,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
         description: <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4"><code className="text-white">{result.filter}</code></pre>,
       });
       // In a real app, you would parse `result.filter` and apply it to the `filters` state.
-      setDialogOpen(false);
+      setPopoverOpen(false);
       form.reset();
     } catch (error) {
       toast({
@@ -189,8 +190,8 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
           selectedVehicle={selectedVehicle}
           onClosePopup={() => setSelectedVehicle(null)}
         />
-        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-            <DialogTrigger asChild>
+        <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+            <PopoverTrigger asChild>
                 <Button 
                     variant="secondary" 
                     size="icon" 
@@ -199,36 +200,39 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                     <Bot className="h-6 w-6" />
                     <span className="sr-only">AI Assistant</span>
                 </Button>
-            </DialogTrigger>
-            <DialogContent className="sm:max-w-[425px]">
-                <DialogHeader>
-                    <DialogTitle>AI Assistant</DialogTitle>
-                    <DialogDescription>
-                    Use natural language to filter vehicle data. e.g., "Show me all trucks in Europe with emissions over 5 tons".
-                    </DialogDescription>
-                </DialogHeader>
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(handleAiSearch)} className="flex flex-col gap-4">
-                    <FormField
-                        control={form.control}
-                        name="query"
-                        render={({ field }) => (
-                        <FormItem>
-                            <FormControl>
-                            <Input placeholder="e.g., trucks in Europe over 5 tons" {...field} className="rounded-sm" />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                        )}
-                    />
-                    <Button type="submit" disabled={isSubmitting} className="rounded-sm">
-                        {isSubmitting ? 'Searching...' : 'Apply Filter'}
-                    </Button>
-                    </form>
-                </Form>
-            </DialogContent>
-        </Dialog>
+            </PopoverTrigger>
+            <PopoverContent className="w-96 rounded-sm" align="end">
+                <div className="grid gap-4">
+                  <div className="space-y-2">
+                    <h4 className="font-medium leading-none">AI Assistant</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Use natural language to filter vehicle data.
+                    </p>
+                  </div>
+                  <Form {...form}>
+                      <form onSubmit={form.handleSubmit(handleAiSearch)} className="flex flex-col gap-4">
+                      <FormField
+                          control={form.control}
+                          name="query"
+                          render={({ field }) => (
+                          <FormItem>
+                              <FormControl>
+                              <Input placeholder="e.g., show trucks in Europe over 5 tons" {...field} className="rounded-sm" />
+                              </FormControl>
+                              <FormMessage />
+                          </FormItem>
+                          )}
+                      />
+                      <Button type="submit" disabled={isSubmitting} className="rounded-sm">
+                          {isSubmitting ? 'Searching...' : 'Apply Filter'}
+                      </Button>
+                      </form>
+                  </Form>
+                </div>
+            </PopoverContent>
+        </Popover>
       </main>
     </div>
   );
 }
+
