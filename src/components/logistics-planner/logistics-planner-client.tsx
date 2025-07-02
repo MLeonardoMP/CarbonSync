@@ -17,10 +17,11 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { PlusCircle, Trash2, Wind, Route, MapPin, Bot, DollarSign, Clock, Lock, ChevronLeft, ChevronRight } from 'lucide-react';
+import { PlusCircle, Trash2, Wind, Route, MapPin, Bot, DollarSign, Clock, Lock, ChevronLeft, ChevronRight, ArrowDown, ArrowUp } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useUser } from '@/hooks/use-user';
+import { Separator } from '@/components/ui/separator';
 
 const legSchema = z.object({
   origin: z.string().min(2, 'Origin is required.'),
@@ -111,6 +112,17 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const renderSavings = (original: number, suggested: number) => {
+    const difference = original - suggested;
+    if (difference > 0) {
+        return <ArrowDown className="h-4 w-4 text-accent" title="Improvement" />;
+    }
+    if (difference < 0) {
+        return <ArrowUp className="h-4 w-4 text-destructive" title="Increase" />;
+    }
+    return <div className="w-4 h-4" />; // Placeholder for alignment
   };
 
   const geoJsonData = useMemo(() => {
@@ -244,6 +256,46 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                             ))}
                           </CardContent>
                         </Card>
+
+                        {/* Comparison Summary */}
+                        {selectedSuggestion && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Comparison Summary</CardTitle>
+                                    <CardDescription>
+                                        Comparing your route with the selected AI suggestion.
+                                    </CardDescription>
+                                </CardHeader>
+                                <CardContent className="space-y-2">
+                                    <div className="grid grid-cols-4 items-center text-sm font-semibold text-muted-foreground">
+                                        <span className="col-span-2">Metric</span>
+                                        <span className="text-right">Your Route</span>
+                                        <span className="text-right">AI Suggestion</span>
+                                    </div>
+                                    <Separator />
+                                    <div className="grid grid-cols-4 items-center text-sm">
+                                        <span className="col-span-2">CO2e Emissions (kg)</span>
+                                        <span className="text-right font-medium">{result.calculatedRoute.totalCO2eEmissions.toLocaleString()}</span>
+                                        <span className="text-right font-medium flex justify-end items-center gap-1">
+                                            {selectedSuggestion.estimatedCO2eEmissions.toLocaleString()}
+                                            {renderSavings(result.calculatedRoute.totalCO2eEmissions, selectedSuggestion.estimatedCO2eEmissions)}
+                                        </span>
+                                    </div>
+                                    <Separator />
+                                    <div className="grid grid-cols-4 items-center text-sm">
+                                        <span className="col-span-2">Estimated Time</span>
+                                        <span className="text-right text-muted-foreground">N/A</span>
+                                        <span className="text-right font-medium">{selectedSuggestion.estimatedTime}</span>
+                                    </div>
+                                    <Separator />
+                                     <div className="grid grid-cols-4 items-center text-sm">
+                                        <span className="col-span-2">Estimated Cost (USD)</span>
+                                        <span className="text-right text-muted-foreground">N/A</span>
+                                        <span className="text-right font-medium">${selectedSuggestion.estimatedCost.toLocaleString()}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
                       </>
                     )}
 

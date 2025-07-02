@@ -6,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { MapRef } from 'react-map-gl';
+import { subDays, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, isWithinInterval } from 'date-fns';
 
 import { vehicles } from '@/lib/data';
 import type { Vehicle, Mode, Region, Carrier } from '@/types';
@@ -51,6 +52,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
     carrier: 'all' as Carrier | 'all',
     emissions: 10,
   });
+  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter'>('month');
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
   const handleAiSearch = async (values: z.infer<typeof searchSchema>) => {
@@ -80,7 +82,24 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
   };
 
   const filteredVehicles = useMemo(() => {
+    const now = new Date();
+    let interval: Interval;
+
+    switch (timeRange) {
+        case 'week':
+            interval = { start: subDays(now, 7), end: now };
+            break;
+        case 'quarter':
+            interval = { start: startOfQuarter(now), end: endOfQuarter(now) };
+            break;
+        case 'month':
+        default:
+            interval = { start: startOfMonth(now), end: endOfMonth(now) };
+            break;
+    }
+
     return vehicles.filter(v => {
+      if (!isWithinInterval(new Date(v.lastUpdated), interval)) return false;
       if (role === 'carrier' && userCarrier && v.carrier !== userCarrier) {
         return false;
       }
@@ -90,7 +109,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
       if (v.co2e > filters.emissions) return false;
       return true;
     });
-  }, [filters, role, userCarrier]);
+  }, [filters, role, userCarrier, timeRange]);
   
   const totalEmissions = useMemo(
     () => filteredVehicles.reduce((acc, v) => acc + v.co2e, 0).toFixed(2),
@@ -137,7 +156,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                         Dashboard
                     </h2>
                     <div className="flex items-center space-x-2">
-                        <Select defaultValue="month">
+                        <Select value={timeRange} onValueChange={(value) => setTimeRange(value as 'week' | 'month' | 'quarter')}>
                             <SelectTrigger className="w-full sm:w-[180px]">
                                 <SelectValue placeholder="Select time range" />
                             </SelectTrigger>
