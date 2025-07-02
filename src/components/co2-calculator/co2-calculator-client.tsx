@@ -88,40 +88,8 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
   }, [result]);
 
   return (
-    <div className="h-full w-full">
-      <div className="absolute inset-0 z-0">
-        <Map
-          mapboxAccessToken={mapboxToken}
-          initialViewState={{ longitude: -30, latitude: 35, zoom: 1.5 }}
-          mapStyle="mapbox://styles/mapbox/dark-v11"
-        >
-          {geoJsonData && (
-            <Source id="route-data" type="geojson" data={geoJsonData}>
-              <Layer
-                id="route-lines"
-                type="line"
-                paint={{
-                  'line-color': 'hsl(var(--primary))',
-                  'line-width': 3,
-                  'line-dasharray': [2, 2]
-                }}
-              />
-            </Source>
-          )}
-          {result?.emissionBreakdown.map((leg, i) => (
-            <React.Fragment key={i}>
-              <Marker longitude={leg.originCoordinates.lon} latitude={leg.originCoordinates.lat}>
-                <MapPin className="h-6 w-6 text-primary" fill="hsl(var(--accent))" stroke="hsl(var(--background))"/>
-              </Marker>
-              <Marker longitude={leg.destinationCoordinates.lon} latitude={leg.destinationCoordinates.lat}>
-                <MapPin className="h-6 w-6 text-primary" fill="hsl(var(--accent))" stroke="hsl(var(--background))"/>
-              </Marker>
-            </React.Fragment>
-          ))}
-        </Map>
-      </div>
-
-      <aside className="absolute left-0 top-0 z-10 h-full w-full max-w-sm overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
+    <div className="h-full w-full flex">
+      <aside className="h-full w-full shrink-0 overflow-y-auto border-r bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
         <ScrollArea className="h-full">
             <div className="flex flex-col gap-6 pr-4">
                 <Card>
@@ -246,7 +214,7 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
                                 <CardTitle>Total Estimated Emissions</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-3xl font-bold text-primary">
+                                    <p className="text-2xl font-bold text-primary">
                                         {result.totalCO2eEmissions.toLocaleString()} kg
                                     </p>
                                     <p className="text-muted-foreground">CO2 Equivalent</p>
@@ -300,6 +268,37 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
             </div>
         </ScrollArea>
       </aside>
+      <main className="relative flex-1">
+        <Map
+          mapboxAccessToken={mapboxToken}
+          initialViewState={{ longitude: -30, latitude: 35, zoom: 1.5 }}
+          mapStyle="mapbox://styles/mapbox/dark-v11"
+        >
+          {geoJsonData && (
+            <Source id="route-data" type="geojson" data={geoJsonData}>
+              <Layer
+                id="route-lines"
+                type="line"
+                paint={{
+                  'line-color': 'hsl(var(--primary))',
+                  'line-width': 3,
+                  'line-dasharray': [2, 2]
+                }}
+              />
+            </Source>
+          )}
+          {result?.emissionBreakdown.map((leg, i) => (
+            <React.Fragment key={i}>
+              <Marker longitude={leg.originCoordinates.lon} latitude={leg.originCoordinates.lat}>
+                <MapPin className="h-6 w-6 text-primary" fill="hsl(var(--accent))" stroke="hsl(var(--background))"/>
+              </Marker>
+              <Marker longitude={leg.destinationCoordinates.lon} latitude={leg.destinationCoordinates.lat}>
+                <MapPin className="h-6 w-6 text-primary" fill="hsl(var(--accent))" stroke="hsl(var(--background))"/>
+              </Marker>
+            </React.Fragment>
+          ))}
+        </Map>
+      </main>
     </div>
   );
 }

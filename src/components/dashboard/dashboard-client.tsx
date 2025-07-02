@@ -116,7 +116,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
         <ScrollArea className="h-full">
             <div className="flex flex-col gap-6 pr-4">
                 <div className="flex items-center justify-between gap-4">
-                    <h2 className="text-xl font-bold tracking-tight">
+                    <h2 className="text-lg font-bold tracking-tight">
                         Dashboard
                     </h2>
                     <div className="flex items-center space-x-2">
@@ -201,11 +201,11 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                     <span className="sr-only">AI Assistant</span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-96 rounded-lg p-0" align="end">
-              <div className="flex h-[450px] flex-col">
-                <div className="border-b p-4">
-                  <h4 className="font-medium leading-none">AI Assistant</h4>
-                  <p className="text-sm text-muted-foreground">
+            <PopoverContent className="w-80 rounded-lg p-0" align="end">
+              <div className="flex h-[400px] flex-col">
+                <div className="border-b p-3">
+                  <h4 className="text-base font-medium leading-none">AI Assistant</h4>
+                  <p className="text-xs text-muted-foreground">
                     Use natural language to filter map data.
                   </p>
                 </div>
@@ -246,7 +246,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                           </FormItem>
                         )}
                       />
-                      <Button type="submit" disabled={isSubmitting} size="icon" className="h-10 w-10 shrink-0 rounded-md">
+                      <Button type="submit" disabled={isSubmitting} size="icon" className="h-9 w-9 shrink-0 rounded-md">
                         <Send className="h-4 w-4" />
                         <span className="sr-only">Send</span>
                       </Button>

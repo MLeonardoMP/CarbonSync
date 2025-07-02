@@ -23,7 +23,7 @@
     --border: 220 13% 28%;
     --input: 220 13% 22%;
     --ring: 225 80% 56%;
-    --radius: 0.3rem;
+    --radius: 0.2rem;
     --chart-1: 225 80% 56%;
     --chart-2: 187 89% 48%;
     --chart-3: 210 40% 98%;
@@ -74,16 +74,21 @@
     background: hsl(var(--card)) !important;
     color: hsl(var(--card-foreground)) !important;
     box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1) !important;
-    border-radius: 0.3rem !important;
-    padding: 1rem !important;
+    border-radius: var(--radius) !important;
+    padding: 0 !important;
     font-family: Inter, sans-serif;
     border: 1px solid hsl(var(--border)) !important;
     max-width: 320px;
-    max-height: 45vh;
+    max-height: 40vh;
     overflow-y: auto;
     scrollbar-width: thin;
     scrollbar-color: hsl(var(--primary)) hsl(var(--secondary));
 }
+
+.mapboxgl-popup-content .popup-content-wrapper {
+    padding: 1rem;
+}
+
 .mapboxgl-popup-content::-webkit-scrollbar {
     width: 6px;
 }

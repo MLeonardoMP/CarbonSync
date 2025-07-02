@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -73,7 +74,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
   if (role === 'carrier') {
     return (
       <div className="flex h-full w-full items-center justify-center p-4">
-        <div className="flex flex-col items-center gap-4 rounded-sm border bg-card p-12 text-center shadow-sm">
+        <div className="flex flex-col items-center gap-4 rounded-lg border bg-card p-12 text-center shadow-sm">
           <Lock className="mx-auto h-12 w-12 text-muted-foreground" />
           <h3 className="mt-4 text-lg font-semibold">Access Denied</h3>
           <p className="mt-2 text-sm text-muted-foreground">
@@ -141,7 +142,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
 
   return (
     <div className="flex h-full w-full">
-      <aside className="z-10 h-full w-full max-w-sm shrink-0 overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
+      <aside className="h-full w-full max-w-sm shrink-0 overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
         <ScrollArea className="h-full">
             <div className="flex flex-col gap-6 pr-4">
                 <Card>
@@ -192,15 +193,15 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                         <Card>
                             <CardHeader><CardTitle>Your Route Calculation</CardTitle></CardHeader>
                             <CardContent className="space-y-4">
-                                <div className="text-center rounded-sm bg-muted p-4">
+                                <div className="text-center rounded-md bg-muted p-4">
                                     <p className="text-sm text-muted-foreground">Total Estimated Emissions</p>
-                                    <p className="text-3xl font-bold text-primary">
+                                    <p className="text-2xl font-bold text-primary">
                                         {result.calculatedRoute.totalCO2eEmissions.toLocaleString()} kg
                                     </p>
                                 </div>
                                 <p className="font-semibold text-sm">Emissions Breakdown</p>
                                 {result.calculatedRoute.emissionBreakdown.map((leg, i) => (
-                                    <div key={`breakdown-${i}`} className="rounded-sm border p-3">
+                                    <div key={`breakdown-${i}`} className="rounded-md border p-3">
                                         <p className="font-semibold text-sm">{leg.legDescription}</p>
                                         <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
                                             <div className="flex items-center gap-2 text-xs"><Wind className="h-4 w-4 text-accent" /><span>{leg.estimatedCO2eEmissions.toLocaleString()} kg CO2e</span></div>
@@ -232,7 +233,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                     )}
 
                     {!isLoading && !result && !error && (
-                        <div className="flex h-32 items-center justify-center rounded-sm border-2 border-dashed bg-card text-center">
+                        <div className="flex h-32 items-center justify-center rounded-lg border-2 border-dashed bg-card text-center">
                             <p className="text-muted-foreground">Results will be displayed here.</p>
                         </div>
                     )}
