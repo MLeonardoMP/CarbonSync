@@ -5,7 +5,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Map, { Source, Layer, type MapRef } from 'react-map-gl';
+import Map, { Source, Layer, type MapRef, NavigationControl, FullscreenControl } from 'react-map-gl';
 import type { Feature, FeatureCollection, LineString } from 'geojson';
 import { useTheme } from 'next-themes';
 
@@ -34,6 +34,7 @@ import { suggestEmissionOptimizedRoutes, type SuggestEmissionOptimizedRoutesOutp
 import { Skeleton } from '../ui/skeleton';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { MapStyleControl } from '@/components/geo-visor/map-style-control';
 
 const routeSchema = z.object({
   origin: z.string().min(2, 'Origin is required'),
@@ -61,11 +62,14 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
   const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
 
   React.useEffect(() => {
-    const timer = setTimeout(() => {
-        setMapStyle(resolvedTheme === 'dark' ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11');
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [resolvedTheme]);
+    const isDefaultThemeStyle = mapStyle.includes('dark-v11') || mapStyle.includes('light-v11');
+    if (isDefaultThemeStyle) {
+      const newDefault = resolvedTheme === 'dark' ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11';
+      if (mapStyle !== newDefault) {
+        setMapStyle(newDefault);
+      }
+    }
+  }, [resolvedTheme, mapStyle]);
 
 
   const form = useForm<z.infer<typeof routeSchema>>({
@@ -295,6 +299,9 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
                 initialViewState={{ longitude: -98, latitude: 39, zoom: 3 }}
                 mapStyle={mapStyle}
             >
+             <NavigationControl position="top-left" />
+             <FullscreenControl position="top-left" />
+             <MapStyleControl currentStyle={mapStyle} onStyleChange={setMapStyle} />
              {geoJsonData && (
                 <Source id="routes-data" type="geojson" data={geoJsonData}>
                     <Layer

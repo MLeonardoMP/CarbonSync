@@ -2,9 +2,10 @@
 'use client';
 
 import React from 'react';
-import Map, { Marker, type MapRef } from 'react-map-gl';
+import Map, { Marker, NavigationControl, FullscreenControl, type MapRef } from 'react-map-gl';
 import { useTheme } from 'next-themes';
 import { VehicleMarker } from './vehicle-marker';
+import { MapStyleControl } from './map-style-control';
 import type { Vehicle } from '@/types';
 
 interface MapViewProps {
@@ -20,11 +21,14 @@ export const MapView = React.forwardRef<MapRef, MapViewProps>(
     const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
 
     React.useEffect(() => {
-      const timer = setTimeout(() => {
-        setMapStyle(resolvedTheme === 'dark' ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11');
-      }, 100);
-      return () => clearTimeout(timer);
-    }, [resolvedTheme]);
+      const isDefaultThemeStyle = mapStyle.includes('dark-v11') || mapStyle.includes('light-v11');
+      if (isDefaultThemeStyle) {
+        const newDefault = resolvedTheme === 'dark' ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11';
+        if (mapStyle !== newDefault) {
+          setMapStyle(newDefault);
+        }
+      }
+    }, [resolvedTheme, mapStyle]);
 
     return (
       <Map
@@ -40,6 +44,9 @@ export const MapView = React.forwardRef<MapRef, MapViewProps>(
         mapStyle={mapStyle}
         onClick={() => onVehicleClick(null as any)} // Allow deselecting by clicking the map
       >
+        <NavigationControl position="top-left" />
+        <FullscreenControl position="top-left" />
+        <MapStyleControl currentStyle={mapStyle} onStyleChange={setMapStyle} />
         {vehicles.map((vehicle) => (
           <Marker
             key={vehicle.id}
