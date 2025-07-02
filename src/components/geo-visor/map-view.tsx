@@ -2,10 +2,11 @@
 'use client';
 
 import React from 'react';
-import Map, { Marker, NavigationControl, FullscreenControl, type MapRef } from 'react-map-gl';
+import Map, { Marker, NavigationControl, FullscreenControl, type MapRef, type Projection } from 'react-map-gl';
 import { useTheme } from 'next-themes';
 import { VehicleMarker } from './vehicle-marker';
 import { MapStyleControl } from './map-style-control';
+import { MapProjectionControl } from './map-projection-control';
 import type { Vehicle } from '@/types';
 
 interface MapViewProps {
@@ -19,6 +20,7 @@ export const MapView = React.forwardRef<MapRef, MapViewProps>(
   ({ mapboxToken, vehicles, onVehicleClick, selectedVehicle }, ref) => {
     const { resolvedTheme } = useTheme();
     const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
+    const [projection, setProjection] = React.useState<Projection['name']>('mercator');
 
     React.useEffect(() => {
       const isDefaultThemeStyle = mapStyle.includes('dark-v11') || mapStyle.includes('light-v11');
@@ -33,13 +35,14 @@ export const MapView = React.forwardRef<MapRef, MapViewProps>(
     return (
       <Map
         ref={ref}
-        key={mapStyle}
+        key={`${mapStyle}-${projection}`}
         mapboxAccessToken={mapboxToken}
         initialViewState={{
           longitude: -20,
           latitude: 40,
           zoom: 2,
         }}
+        projection={{ name: projection }}
         style={{ width: '100%', height: '100%' }}
         mapStyle={mapStyle}
         onClick={() => onVehicleClick(null as any)} // Allow deselecting by clicking the map
@@ -47,6 +50,7 @@ export const MapView = React.forwardRef<MapRef, MapViewProps>(
         <NavigationControl position="top-left" />
         <FullscreenControl position="top-left" />
         <MapStyleControl currentStyle={mapStyle} onStyleChange={setMapStyle} />
+        <MapProjectionControl currentProjection={projection} onProjectionChange={setProjection} />
         {vehicles.map((vehicle) => (
           <Marker
             key={vehicle.id}

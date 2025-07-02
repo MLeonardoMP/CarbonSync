@@ -5,7 +5,7 @@ import React, { useState, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Map, { Source, Layer, type MapRef, NavigationControl, FullscreenControl } from 'react-map-gl';
+import Map, { Source, Layer, type MapRef, NavigationControl, FullscreenControl, type Projection } from 'react-map-gl';
 import type { Feature, FeatureCollection, LineString } from 'geojson';
 import { useTheme } from 'next-themes';
 
@@ -35,6 +35,7 @@ import { Skeleton } from '../ui/skeleton';
 import { cn } from '@/lib/utils';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MapStyleControl } from '@/components/geo-visor/map-style-control';
+import { MapProjectionControl } from '@/components/geo-visor/map-projection-control';
 
 const routeSchema = z.object({
   origin: z.string().min(2, 'Origin is required'),
@@ -60,6 +61,7 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
   const mapRef = useRef<MapRef>(null);
 
   const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
+  const [projection, setProjection] = React.useState<Projection['name']>('mercator');
 
   React.useEffect(() => {
     const isDefaultThemeStyle = mapStyle.includes('dark-v11') || mapStyle.includes('light-v11');
@@ -294,14 +296,16 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
             </Button>
             <Map
                 ref={mapRef}
-                key={mapStyle}
+                key={`${mapStyle}-${projection}`}
                 mapboxAccessToken={mapboxToken}
                 initialViewState={{ longitude: -98, latitude: 39, zoom: 3 }}
+                projection={{name: projection}}
                 mapStyle={mapStyle}
             >
              <NavigationControl position="top-left" />
              <FullscreenControl position="top-left" />
              <MapStyleControl currentStyle={mapStyle} onStyleChange={setMapStyle} />
+             <MapProjectionControl currentProjection={projection} onProjectionChange={setProjection} />
              {geoJsonData && (
                 <Source id="routes-data" type="geojson" data={geoJsonData}>
                     <Layer
