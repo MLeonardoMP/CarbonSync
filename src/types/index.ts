@@ -4,7 +4,7 @@ export type Carrier = 'EcoHaul' | 'SwiftTrans' | 'AquaGlide' | 'RailForward';
 
 export type Region = 'North America' | 'Europe' | 'Asia';
 
-export type Mode = 'truck' | 'rail' | 'sea';
+export type Mode = 'truck' | 'rail' | 'sea' | 'air';
 
 export type Vehicle = {
   id: string;

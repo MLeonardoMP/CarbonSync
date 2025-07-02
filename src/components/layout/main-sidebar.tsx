@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LineChart, Map, Bot, UserCircle, LogOut } from 'lucide-react';
+import { LineChart, Map, Bot, UserCircle, LogOut, Calculator } from 'lucide-react';
 import { Logo } from '@/components/icons/logo';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ const navItems = [
   { href: '/dashboard', icon: LineChart, label: 'Dashboard' },
   { href: '/geo-visor', icon: Map, label: 'Geo-Visor' },
   { href: '/route-optimizer', icon: Bot, label: 'Route Optimizer' },
+  { href: '/co2-calculator', icon: Calculator, label: 'CO2 Calculator' },
 ];
 
 export function MainSidebar() {
