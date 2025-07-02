@@ -38,7 +38,7 @@ const ModeIcon = ({ mode }: { mode: Vehicle['mode'] }) => {
 
 export function VehicleInfoPopup({ vehicle }: VehicleInfoPopupProps) {
   return (
-    <div className="w-72 font-sans">
+    <div className="font-sans">
         {/* Header */}
         <div className="mb-3">
             <div className="flex items-center justify-between">
