@@ -137,8 +137,8 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
     }));
   }, [filteredVehicles]);
 
-  const handleVehicleClick = (vehicle: Vehicle) => {
-    if (selectedVehicle?.id === vehicle.id) {
+  const handleVehicleClick = (vehicle: Vehicle | null) => {
+    if (selectedVehicle?.id === vehicle?.id) {
         setSelectedVehicle(null);
     } else {
         setSelectedVehicle(vehicle);

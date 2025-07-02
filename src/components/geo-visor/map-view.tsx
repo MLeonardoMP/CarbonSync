@@ -12,7 +12,7 @@ import type { Vehicle } from '@/types';
 interface MapViewProps {
   mapboxToken: string;
   vehicles: Vehicle[];
-  onVehicleClick: (vehicle: Vehicle) => void;
+  onVehicleClick: (vehicle: Vehicle | null) => void;
   selectedVehicle: Vehicle | null;
 }
 
@@ -45,7 +45,7 @@ export const MapView = React.forwardRef<MapRef, MapViewProps>(
         projection={{ name: projection }}
         style={{ width: '100%', height: '100%' }}
         mapStyle={mapStyle}
-        onClick={() => onVehicleClick(null as any)} // Allow deselecting by clicking the map
+        onClick={() => onVehicleClick(null)} // Allow deselecting by clicking the map
       >
         <NavigationControl position="top-left" />
         <FullscreenControl position="top-left" />
