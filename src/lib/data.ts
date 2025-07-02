@@ -1,5 +1,12 @@
 import type { Vehicle, Carrier, Region, Mode } from '@/types';
 
+// A simple seeded random number generator to ensure consistent data between server and client renders.
+let seed = 1;
+function seededRandom() {
+    const x = Math.sin(seed++) * 10000;
+    return x - Math.floor(x);
+}
+
 const carriers: Carrier[] = ['EcoHaul', 'SwiftTrans', 'AquaGlide', 'RailForward'];
 const regions: Region[] = ['North America', 'Europe', 'Asia'];
 const modes: Mode[] = ['truck', 'rail', 'sea'];
@@ -18,15 +25,17 @@ const generateRandomCoordinates = (region: Region) => {
   const latRange = bounds[region].lat;
   const lngRange = bounds[region].lng;
   return {
-    lat: Math.random() * (latRange[1] - latRange[0]) + latRange[0],
-    lng: Math.random() * (lngRange[1] - lngRange[0]) + lngRange[0],
+    lat: seededRandom() * (latRange[1] - latRange[0]) + latRange[0],
+    lng: seededRandom() * (lngRange[1] - lngRange[0]) + lngRange[0],
   };
 };
 
+const baseTime = new Date('2024-01-01T00:00:00Z').getTime();
+
 export const vehicles: Vehicle[] = Array.from({ length: 50 }, (_, i) => {
-  const mode = modes[Math.floor(Math.random() * modes.length)];
-  const region = regions[Math.floor(Math.random() * regions.length)];
-  const carrier = carriers[Math.floor(Math.random() * carriers.length)];
+  const mode = modes[Math.floor(seededRandom() * modes.length)];
+  const region = regions[Math.floor(seededRandom() * regions.length)];
+  const carrier = carriers[Math.floor(seededRandom() * carriers.length)];
   
   let vehicleType: string, specificFuelTypes: ('Diesel' | 'Electric' | 'Marine Gas Oil' | 'LNG')[];
 
@@ -45,24 +54,24 @@ export const vehicles: Vehicle[] = Array.from({ length: 50 }, (_, i) => {
       break;
   }
   
-  const fuelType = specificFuelTypes[Math.floor(Math.random() * specificFuelTypes.length)];
+  const fuelType = specificFuelTypes[Math.floor(seededRandom() * specificFuelTypes.length)];
 
   return {
     id: `VEH-${1000 + i}`,
     type: vehicleType,
     mode: mode,
-    speed: Math.floor(Math.random() * 80) + 20,
-    timestamp: new Date(Date.now() - Math.random() * 1000 * 60 * 60 * 24).toISOString(),
-    co2e: parseFloat((Math.random() * 10).toFixed(2)),
-    eta: new Date(Date.now() + Math.random() * 1000 * 60 * 60 * 48).toISOString(),
+    speed: Math.floor(seededRandom() * 80) + 20,
+    timestamp: new Date(baseTime - seededRandom() * 1000 * 60 * 60 * 24).toISOString(),
+    co2e: parseFloat((seededRandom() * 10).toFixed(2)),
+    eta: new Date(baseTime + seededRandom() * 1000 * 60 * 60 * 48).toISOString(),
     fuelType: fuelType,
     carrier: carrier,
     origin: `${region} Port ${i % 5 + 1}`,
     destination: `${regions[(regions.indexOf(region) + 1) % regions.length]} Hub ${i % 3 + 1}`,
-    lastUpdated: new Date(Date.now() - Math.random() * 1000 * 60 * 10).toISOString(),
+    lastUpdated: new Date(baseTime - seededRandom() * 1000 * 60 * 10).toISOString(),
     position: generateRandomCoordinates(region),
     region: region,
-    loadFactor: parseFloat(Math.random().toFixed(2)),
-    costPerKm: parseFloat((Math.random() * 2 + 0.5).toFixed(2)),
+    loadFactor: parseFloat(seededRandom().toFixed(2)),
+    costPerKm: parseFloat((seededRandom() * 2 + 0.5).toFixed(2)),
   };
 });
