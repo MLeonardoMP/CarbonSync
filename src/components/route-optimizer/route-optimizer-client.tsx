@@ -1,12 +1,13 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Map, { Source, Layer } from 'react-map-gl';
+import Map, { Source, Layer, type MapRef } from 'react-map-gl';
 import type { Feature, FeatureCollection, LineString } from 'geojson';
+import { useTheme } from 'next-themes';
 
 import {
   Form,
@@ -28,7 +29,7 @@ import {
 } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useUser } from '@/hooks/use-user';
-import { Lock, Bot, Wind, DollarSign, Clock } from 'lucide-react';
+import { Lock, Bot, Wind, DollarSign, Clock, ChevronLeft, ChevronRight } from 'lucide-react';
 import { suggestEmissionOptimizedRoutes, type SuggestEmissionOptimizedRoutesOutput } from '@/ai/flows/suggest-emission-optimized-routes';
 import { Skeleton } from '../ui/skeleton';
 import { cn } from '@/lib/utils';
@@ -49,10 +50,23 @@ type Suggestion = SuggestEmissionOptimizedRoutesOutput['suggestions'][0];
 
 export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
   const { role } = useUser();
+  const { resolvedTheme } = useTheme();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [selectedSuggestion, setSelectedSuggestion] = useState<Suggestion | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const mapRef = useRef<MapRef>(null);
+
+  const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+        setMapStyle(resolvedTheme === 'dark' ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11');
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [resolvedTheme]);
+
 
   const form = useForm<z.infer<typeof routeSchema>>({
     resolver: zodResolver(routeSchema),
@@ -78,6 +92,13 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
       </div>
     );
   }
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!isSidebarOpen);
+    setTimeout(() => {
+        mapRef.current?.resize();
+    }, 300); // match transition duration
+  };
 
   const onSubmit = async (values: z.infer<typeof routeSchema>) => {
     setIsLoading(true);
@@ -121,46 +142,15 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
   }, [suggestions]);
 
   return (
-    <div className="h-full w-full">
-        <div className="absolute inset-0 z-0">
-            <Map
-                mapboxAccessToken={mapboxToken}
-                initialViewState={{ longitude: -98, latitude: 39, zoom: 3 }}
-                mapStyle="mapbox://styles/mapbox/dark-v11"
-            >
-             {geoJsonData && (
-                <Source id="routes-data" type="geojson" data={geoJsonData}>
-                    <Layer
-                        id="routes-lines"
-                        type="line"
-                        paint={{
-                            'line-color': [
-                                'case',
-                                ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
-                                'hsl(var(--primary))',
-                                'hsl(var(--border))'
-                            ],
-                            'line-width': [
-                                'case',
-                                ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
-                                4,
-                                2
-                            ],
-                            'line-opacity': [
-                                'case',
-                                ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
-                                1,
-                                0.7
-                            ]
-                        }}
-                    />
-                </Source>
-             )}
-            </Map>
-        </div>
-        
-        <aside className="absolute left-0 top-0 z-10 h-full w-full max-w-sm overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
-            <ScrollArea className="h-full">
+    <div className="h-[calc(100vh-theme(spacing.14))] w-full flex">
+       <aside className={cn(
+        "relative h-full shrink-0 overflow-y-auto border-r border-border/50 bg-background transition-[width,padding,border] duration-300 ease-in-out",
+        isSidebarOpen ? "w-full p-4 md:w-[420px]" : "w-0 p-0 border-transparent"
+      )}>
+            <ScrollArea className={cn(
+                "h-full transition-opacity duration-300",
+                isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+            )}>
                 <div className="flex flex-col gap-6 pr-4">
                     <Card>
                         <CardHeader>
@@ -238,7 +228,7 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
                         </CardContent>
                     </Card>
                     <div className="space-y-4">
-                        <h3 className="text-xl font-semibold">Suggested Routes</h3>
+                        <h3 className="text-lg font-semibold tracking-tight">Suggested Routes</h3>
                         {error && <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
                         
                         {isLoading && Array.from({ length: 2 }).map((_, i) => (
@@ -248,10 +238,10 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
                             <Card 
                                 key={i} 
                                 onClick={() => setSelectedSuggestion(s)}
-                                className={cn("cursor-pointer transition-all", selectedSuggestion?.routeDescription === s.routeDescription ? "border-primary ring-2 ring-ring" : "border-border hover:border-primary/50")}
+                                className={cn("cursor-pointer transition-all", selectedSuggestion?.routeDescription === s.routeDescription ? "border-primary ring-1 ring-primary" : "border-border hover:border-primary/50")}
                             >
                             <CardHeader>
-                                <CardTitle>Option {i + 1}</CardTitle>
+                                <CardTitle className="text-base">Option {i + 1}</CardTitle>
                                 <p className="text-sm text-muted-foreground">{s.routeDescription}</p>
                             </CardHeader>
                             <CardContent className="grid gap-4 sm:grid-cols-3">
@@ -288,6 +278,53 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
                 </div>
             </ScrollArea>
         </aside>
+        <main className="relative flex-1">
+            <Button
+                variant="secondary"
+                size="icon"
+                onClick={toggleSidebar}
+                className="absolute top-1/2 -translate-y-1/2 left-2 z-10 h-6 w-6 rounded-full shadow-md"
+            >
+                {isSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                <span className="sr-only">Toggle sidebar</span>
+            </Button>
+            <Map
+                ref={mapRef}
+                key={mapStyle}
+                mapboxAccessToken={mapboxToken}
+                initialViewState={{ longitude: -98, latitude: 39, zoom: 3 }}
+                mapStyle={mapStyle}
+            >
+             {geoJsonData && (
+                <Source id="routes-data" type="geojson" data={geoJsonData}>
+                    <Layer
+                        id="routes-lines"
+                        type="line"
+                        paint={{
+                            'line-color': [
+                                'case',
+                                ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
+                                'hsl(var(--primary))',
+                                'hsl(var(--border))'
+                            ],
+                            'line-width': [
+                                'case',
+                                ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
+                                4,
+                                2
+                            ],
+                            'line-opacity': [
+                                'case',
+                                ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
+                                1,
+                                0.7
+                            ]
+                        }}
+                    />
+                </Source>
+             )}
+            </Map>
+        </main>
     </div>
   );
 }

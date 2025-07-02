@@ -1,5 +1,7 @@
-import { redirect } from 'next/navigation';
+import { RouteOptimizerClient } from '@/components/route-optimizer/route-optimizer-client';
 
 export default function RouteOptimizerPage() {
-    redirect('/logistics-planner');
+    const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || '';
+
+    return <RouteOptimizerClient mapboxToken={mapboxToken} />;
 }

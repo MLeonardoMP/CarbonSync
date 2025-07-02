@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { UserCircle, Map, Bot, LogOut } from 'lucide-react';
+import { UserCircle, Map, Bot, LogOut, Calculator, Route } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import type { UserRole, Carrier } from '@/types';
 import { Logo } from '@/components/icons/logo';
@@ -25,6 +25,8 @@ const carriers: Carrier[] = ['EcoHaul', 'SwiftTrans', 'AquaGlide', 'RailForward'
 const navItems = [
   { href: '/dashboard', icon: Map, label: 'Dashboard' },
   { href: '/logistics-planner', icon: Bot, label: 'Logistics Planner' },
+  { href: '/co2-calculator', icon: Calculator, label: 'CO2 Calculator' },
+  { href: '/route-optimizer', icon: Route, label: 'Route Optimizer' },
 ];
 
 export function BottomNav() {

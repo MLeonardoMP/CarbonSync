@@ -1,12 +1,13 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import Map, { Source, Layer, Marker } from 'react-map-gl';
+import Map, { Source, Layer, Marker, type MapRef } from 'react-map-gl';
 import type { FeatureCollection } from 'geojson';
+import { useTheme } from 'next-themes';
 
 import { calculateCo2Emissions, type CalculateCo2EmissionsOutput } from '@/ai/flows/calculate-co2-emissions';
 import { Button } from '@/components/ui/button';
@@ -16,8 +17,9 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calculator, PlusCircle, Trash2, Wind, Route, TrendingUp, MapPin } from 'lucide-react';
+import { Calculator, PlusCircle, Trash2, Wind, Route, TrendingUp, MapPin, ChevronLeft, ChevronRight } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { cn } from '@/lib/utils';
 
 const legSchema = z.object({
   origin: z.string().min(2, 'Origin is required.'),
@@ -39,6 +41,26 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
   const [result, setResult] = useState<CalculateCo2EmissionsOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const { resolvedTheme } = useTheme();
+  const [isSidebarOpen, setSidebarOpen] = useState(true);
+  const mapRef = useRef<MapRef>(null);
+
+  const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+        setMapStyle(resolvedTheme === 'dark' ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11');
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [resolvedTheme]);
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!isSidebarOpen);
+    setTimeout(() => {
+        mapRef.current?.resize();
+    }, 300); // match transition duration
+  };
 
   const form = useForm<CalculatorFormValues>({
     resolver: zodResolver(calculatorSchema),
@@ -88,9 +110,15 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
   }, [result]);
 
   return (
-    <div className="h-full w-full flex">
-      <aside className="h-full w-full shrink-0 overflow-y-auto border-r bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
-        <ScrollArea className="h-full">
+    <div className="h-[calc(100vh-theme(spacing.14))] w-full flex">
+      <aside className={cn(
+        "relative h-full shrink-0 overflow-y-auto border-r bg-background transition-[width,padding,border] duration-300 ease-in-out",
+        isSidebarOpen ? "w-full p-4 md:w-[420px]" : "w-0 p-0 border-transparent"
+      )}>
+        <ScrollArea className={cn(
+          "h-full transition-opacity duration-300",
+          isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
+        )}>
             <div className="flex flex-col gap-6 pr-4">
                 <Card>
                     <CardHeader>
@@ -194,7 +222,7 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
                     </CardContent>
                 </Card>
                 <div className="space-y-4">
-                    <h3 className="text-xl font-semibold">Calculation Result</h3>
+                    <h3 className="text-lg font-semibold tracking-tight">Calculation Result</h3>
                     <div className="space-y-4">
                         {isLoading && (
                             <Card>
@@ -214,7 +242,7 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
                                 <CardTitle>Total Estimated Emissions</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-2xl font-bold text-primary">
+                                    <p className="text-xl font-bold text-primary">
                                         {result.totalCO2eEmissions.toLocaleString()} kg
                                     </p>
                                     <p className="text-muted-foreground">CO2 Equivalent</p>
@@ -269,10 +297,21 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
         </ScrollArea>
       </aside>
       <main className="relative flex-1">
+        <Button
+            variant="secondary"
+            size="icon"
+            onClick={toggleSidebar}
+            className="absolute top-1/2 -translate-y-1/2 left-2 z-10 h-6 w-6 rounded-full shadow-md"
+          >
+            {isSidebarOpen ? <ChevronLeft className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+            <span className="sr-only">Toggle sidebar</span>
+        </Button>
         <Map
+          ref={mapRef}
+          key={mapStyle}
           mapboxAccessToken={mapboxToken}
           initialViewState={{ longitude: -30, latitude: 35, zoom: 1.5 }}
-          mapStyle="mapbox://styles/mapbox/dark-v11"
+          mapStyle={mapStyle}
         >
           {geoJsonData && (
             <Source id="route-data" type="geojson" data={geoJsonData}>
