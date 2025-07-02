@@ -1,18 +1,21 @@
 'use client';
 
 import React from 'react';
-import Map, { Marker } from 'react-map-gl';
+import Map, { Marker, Popup } from 'react-map-gl';
 import { useTheme } from 'next-themes';
 import { VehicleMarker } from './vehicle-marker';
+import { VehicleInfoPopup } from './vehicle-info-panel';
 import type { Vehicle } from '@/types';
 
 interface MapViewProps {
   mapboxToken: string;
   vehicles: Vehicle[];
   onVehicleClick: (vehicle: Vehicle) => void;
+  selectedVehicle: Vehicle | null;
+  onClosePopup: () => void;
 }
 
-export function MapView({ mapboxToken, vehicles, onVehicleClick }: MapViewProps) {
+export function MapView({ mapboxToken, vehicles, onVehicleClick, selectedVehicle, onClosePopup }: MapViewProps) {
   const { resolvedTheme } = useTheme();
   const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
 
@@ -50,6 +53,18 @@ export function MapView({ mapboxToken, vehicles, onVehicleClick }: MapViewProps)
           <VehicleMarker mode={vehicle.mode} />
         </Marker>
       ))}
+
+      {selectedVehicle && (
+        <Popup
+            longitude={selectedVehicle.position.lng}
+            latitude={selectedVehicle.position.lat}
+            onClose={onClosePopup}
+            closeOnClick={false}
+            anchor="bottom"
+        >
+            <VehicleInfoPopup vehicle={selectedVehicle} />
+        </Popup>
+      )}
     </Map>
   );
 }

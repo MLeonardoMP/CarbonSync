@@ -1,41 +1,29 @@
 'use client';
 
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-} from '@/components/ui/sheet';
 import type { Vehicle } from '@/types';
 import { format } from 'date-fns';
 
-interface VehicleInfoPanelProps {
-  vehicle: Vehicle | null;
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
+interface VehicleInfoPopupProps {
+  vehicle: Vehicle;
 }
 
 const InfoRow = ({ label, value }: { label: string; value: React.ReactNode }) => (
-    <div className="flex justify-between border-b py-3 text-sm">
+    <div className="flex justify-between border-b border-border/50 py-1.5 text-xs last:border-b-0">
         <p className="text-muted-foreground">{label}</p>
-        <p className="font-medium text-right">{value}</p>
+        <p className="font-medium text-right text-foreground">{value}</p>
     </div>
 );
 
-export function VehicleInfoPanel({ vehicle, isOpen, onOpenChange }: VehicleInfoPanelProps) {
-  if (!vehicle) return null;
-
+export function VehicleInfoPopup({ vehicle }: VehicleInfoPopupProps) {
   return (
-    <Sheet open={isOpen} onOpenChange={onOpenChange}>
-      <SheetContent className="w-[400px] sm:w-[540px]">
-        <SheetHeader className="mb-4">
-          <SheetTitle>{vehicle.id} - {vehicle.type}</SheetTitle>
-          <SheetDescription>
-            {vehicle.origin} to {vehicle.destination}
-          </SheetDescription>
-        </SheetHeader>
-        <div className="space-y-2">
+    <div className="w-64">
+        <div className="mb-2">
+            <h3 className="font-semibold">{vehicle.id} - {vehicle.type}</h3>
+            <p className="text-sm text-muted-foreground">
+                {vehicle.origin} to {vehicle.destination}
+            </p>
+        </div>
+        <div className="space-y-1">
             <InfoRow label="Carrier" value={vehicle.carrier} />
             <InfoRow label="Mode" value={<span className="capitalize">{vehicle.mode}</span>} />
             <InfoRow label="Region" value={vehicle.region} />
@@ -47,7 +35,6 @@ export function VehicleInfoPanel({ vehicle, isOpen, onOpenChange }: VehicleInfoP
             <InfoRow label="Cost per km" value={`$${vehicle.costPerKm.toFixed(2)}`} />
             <InfoRow label="Last Updated" value={format(new Date(vehicle.lastUpdated), "MMM d, h:mm a")} />
         </div>
-      </SheetContent>
-    </Sheet>
+    </div>
   );
 }

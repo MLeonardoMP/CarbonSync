@@ -11,7 +11,6 @@ import { StatsCard } from './stats-card';
 import { EmissionsChart } from './emissions-chart';
 import { FilterBar } from '@/components/geo-visor/filter-bar';
 import { MapView } from '@/components/geo-visor/map-view';
-import { VehicleInfoPanel } from '@/components/geo-visor/vehicle-info-panel';
 
 import { Truck, Ship, Leaf, Globe } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -90,7 +89,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
 
   return (
     <div className="flex h-full w-full">
-      <aside className="z-10 h-full w-full max-w-sm shrink-0 overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
+      <aside className="relative z-10 h-full w-full shrink-0 overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
         <ScrollArea className="h-full">
             <div className="flex flex-col gap-6 pr-4">
                 <div className="flex items-center justify-between gap-4">
@@ -113,7 +112,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                 
                 <FilterBar filters={filters} setFilters={setFilters} onAiSearch={handleAiSearch} />
 
-                <div className="grid gap-4 md:grid-cols-2">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <StatsCard
                         title="Total CO2e Emissions"
                         value={`${totalEmissions} tons`}
@@ -165,14 +164,10 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
           mapboxToken={mapboxToken}
           vehicles={filteredVehicles}
           onVehicleClick={setSelectedVehicle}
+          selectedVehicle={selectedVehicle}
+          onClosePopup={() => setSelectedVehicle(null)}
         />
       </main>
-
-      <VehicleInfoPanel
-          vehicle={selectedVehicle}
-          isOpen={!!selectedVehicle}
-          onOpenChange={(open) => !open && setSelectedVehicle(null)}
-      />
     </div>
   );
 }
