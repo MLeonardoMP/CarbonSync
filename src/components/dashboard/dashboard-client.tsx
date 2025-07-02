@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -90,16 +89,8 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
 
 
   return (
-    <div className="relative h-full w-full">
-      <div className="absolute inset-0 z-0">
-        <MapView
-          mapboxToken={mapboxToken}
-          vehicles={filteredVehicles}
-          onVehicleClick={setSelectedVehicle}
-        />
-      </div>
-
-      <aside className="absolute left-0 top-0 z-10 h-full w-full max-w-sm overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
+    <div className="flex h-full w-full">
+      <aside className="z-10 h-full w-full max-w-sm shrink-0 overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
         <ScrollArea className="h-full">
             <div className="flex flex-col gap-6 pr-4">
                 <div className="flex items-center justify-between gap-4">
@@ -168,6 +159,14 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
             </div>
         </ScrollArea>
       </aside>
+
+      <main className="relative flex-1">
+         <MapView
+          mapboxToken={mapboxToken}
+          vehicles={filteredVehicles}
+          onVehicleClick={setSelectedVehicle}
+        />
+      </main>
 
       <VehicleInfoPanel
           vehicle={selectedVehicle}

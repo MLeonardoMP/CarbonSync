@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -129,69 +128,8 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
   }, [result]);
 
   return (
-    <div className="relative h-full w-full">
-      <div className="absolute inset-0 z-0">
-        <Map
-          mapboxAccessToken={mapboxToken}
-          initialViewState={{ longitude: -30, latitude: 35, zoom: 1.5 }}
-          mapStyle="mapbox://styles/mapbox/dark-v11"
-        >
-          {geoJsonData && (
-            <Source id="route-data" type="geojson" data={geoJsonData}>
-              {/* Layer for user's defined route */}
-              <Layer
-                id="user-route-lines"
-                type="line"
-                filter={['==', ['get', 'type'], 'user-defined']}
-                paint={{
-                  'line-color': 'hsl(var(--accent))',
-                  'line-width': 3,
-                  'line-dasharray': [2, 2],
-                  'line-opacity': 0.8
-                }}
-              />
-              {/* Layer for suggested routes */}
-              <Layer
-                  id="suggestion-routes-lines"
-                  type="line"
-                  filter={['==', ['get', 'type'], 'suggestion']}
-                  paint={{
-                      'line-color': [
-                          'case',
-                          ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
-                          'hsl(var(--primary))',
-                          'hsl(var(--border))'
-                      ],
-                      'line-width': [
-                          'case',
-                          ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
-                          4,
-                          2
-                      ],
-                      'line-opacity': [
-                          'case',
-                          ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
-                          1,
-                          0.7
-                      ]
-                  }}
-              />
-            </Source>
-          )}
-          {result?.calculatedRoute.emissionBreakdown.map((leg, i) => (
-            <React.Fragment key={`marker-${i}`}>
-              <Marker longitude={leg.originCoordinates.lon} latitude={leg.originCoordinates.lat}>
-                <MapPin className="h-6 w-6 text-accent" fill="hsl(var(--accent))" stroke="hsl(var(--background))"/>
-              </Marker>
-              <Marker longitude={leg.destinationCoordinates.lon} latitude={leg.destinationCoordinates.lat}>
-                <MapPin className="h-6 w-6 text-accent" fill="hsl(var(--accent))" stroke="hsl(var(--background))"/>
-              </Marker>
-            </React.Fragment>
-          ))}
-        </Map>
-      </div>
-
-      <aside className="absolute left-0 top-0 z-10 h-full w-full max-w-sm overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
+    <div className="flex h-full w-full">
+      <aside className="z-10 h-full w-full max-w-sm shrink-0 overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
         <ScrollArea className="h-full">
             <div className="flex flex-col gap-6 pr-4">
                 <Card>
@@ -290,6 +228,66 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
             </div>
         </ScrollArea>
       </aside>
+      <main className="relative flex-1">
+        <Map
+          mapboxAccessToken={mapboxToken}
+          initialViewState={{ longitude: -30, latitude: 35, zoom: 1.5 }}
+          mapStyle="mapbox://styles/mapbox/dark-v11"
+        >
+          {geoJsonData && (
+            <Source id="route-data" type="geojson" data={geoJsonData}>
+              {/* Layer for user's defined route */}
+              <Layer
+                id="user-route-lines"
+                type="line"
+                filter={['==', ['get', 'type'], 'user-defined']}
+                paint={{
+                  'line-color': 'hsl(var(--accent))',
+                  'line-width': 3,
+                  'line-dasharray': [2, 2],
+                  'line-opacity': 0.8
+                }}
+              />
+              {/* Layer for suggested routes */}
+              <Layer
+                  id="suggestion-routes-lines"
+                  type="line"
+                  filter={['==', ['get', 'type'], 'suggestion']}
+                  paint={{
+                      'line-color': [
+                          'case',
+                          ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
+                          'hsl(var(--primary))',
+                          'hsl(var(--border))'
+                      ],
+                      'line-width': [
+                          'case',
+                          ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
+                          4,
+                          2
+                      ],
+                      'line-opacity': [
+                          'case',
+                          ['==', ['get', 'id'], selectedSuggestion?.routeDescription || ''],
+                          1,
+                          0.7
+                      ]
+                  }}
+              />
+            </Source>
+          )}
+          {result?.calculatedRoute.emissionBreakdown.map((leg, i) => (
+            <React.Fragment key={`marker-${i}`}>
+              <Marker longitude={leg.originCoordinates.lon} latitude={leg.originCoordinates.lat}>
+                <MapPin className="h-6 w-6 text-accent" fill="hsl(var(--accent))" stroke="hsl(var(--background))"/>
+              </Marker>
+              <Marker longitude={leg.destinationCoordinates.lon} latitude={leg.destinationCoordinates.lat}>
+                <MapPin className="h-6 w-6 text-accent" fill="hsl(var(--accent))" stroke="hsl(var(--background))"/>
+              </Marker>
+            </React.Fragment>
+          ))}
+        </Map>
+      </main>
     </div>
   );
 }
