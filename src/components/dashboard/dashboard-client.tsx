@@ -16,7 +16,7 @@ import { VehicleInfoPanel } from '@/components/geo-visor/vehicle-info-panel';
 import { Truck, Ship, Leaf, Globe } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export function DashboardClient({ apiKey }: { apiKey: string }) {
+export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
   const { role, carrier: userCarrier } = useUser();
   const { toast } = useToast();
 
@@ -138,7 +138,7 @@ export function DashboardClient({ apiKey }: { apiKey: string }) {
       <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
         <div className="lg:col-span-2 h-[500px] rounded-lg border shadow-sm overflow-hidden">
             <MapView
-                apiKey={apiKey}
+                mapboxToken={mapboxToken}
                 vehicles={filteredVehicles}
                 onVehicleClick={setSelectedVehicle}
             />
