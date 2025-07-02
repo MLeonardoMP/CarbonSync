@@ -1,10 +1,10 @@
+
 'use client';
 
 import React from 'react';
-import Map, { Marker, Popup, type MapRef } from 'react-map-gl';
+import Map, { Marker, type MapRef } from 'react-map-gl';
 import { useTheme } from 'next-themes';
 import { VehicleMarker } from './vehicle-marker';
-import { VehicleInfoPopup } from './vehicle-info-panel';
 import type { Vehicle } from '@/types';
 
 interface MapViewProps {
@@ -12,16 +12,14 @@ interface MapViewProps {
   vehicles: Vehicle[];
   onVehicleClick: (vehicle: Vehicle) => void;
   selectedVehicle: Vehicle | null;
-  onClosePopup: () => void;
 }
 
 export const MapView = React.forwardRef<MapRef, MapViewProps>(
-  ({ mapboxToken, vehicles, onVehicleClick, selectedVehicle, onClosePopup }, ref) => {
+  ({ mapboxToken, vehicles, onVehicleClick, selectedVehicle }, ref) => {
     const { resolvedTheme } = useTheme();
     const [mapStyle, setMapStyle] = React.useState('mapbox://styles/mapbox/dark-v11');
 
     React.useEffect(() => {
-      // A slight delay to prevent map flashing during theme change
       const timer = setTimeout(() => {
         setMapStyle(resolvedTheme === 'dark' ? 'mapbox://styles/mapbox/dark-v11' : 'mapbox://styles/mapbox/light-v11');
       }, 100);
@@ -31,7 +29,7 @@ export const MapView = React.forwardRef<MapRef, MapViewProps>(
     return (
       <Map
         ref={ref}
-        key={mapStyle} // Force map re-render on style change
+        key={mapStyle}
         mapboxAccessToken={mapboxToken}
         initialViewState={{
           longitude: -20,
@@ -40,6 +38,7 @@ export const MapView = React.forwardRef<MapRef, MapViewProps>(
         }}
         style={{ width: '100%', height: '100%' }}
         mapStyle={mapStyle}
+        onClick={() => onVehicleClick(null as any)} // Allow deselecting by clicking the map
       >
         {vehicles.map((vehicle) => (
           <Marker
@@ -52,21 +51,9 @@ export const MapView = React.forwardRef<MapRef, MapViewProps>(
               onVehicleClick(vehicle);
             }}
           >
-            <VehicleMarker mode={vehicle.mode} />
+            <VehicleMarker mode={vehicle.mode} isSelected={selectedVehicle?.id === vehicle.id} />
           </Marker>
         ))}
-
-        {selectedVehicle && (
-          <Popup
-              longitude={selectedVehicle.position.lng}
-              latitude={selectedVehicle.position.lat}
-              onClose={onClosePopup}
-              closeOnClick={false}
-              anchor="bottom"
-          >
-              <VehicleInfoPopup vehicle={selectedVehicle} />
-          </Popup>
-        )}
       </Map>
     );
   }

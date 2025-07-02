@@ -18,10 +18,10 @@ import { StatsCard } from './stats-card';
 import { EmissionsChart } from './emissions-chart';
 import { FilterBar } from '@/components/geo-visor/filter-bar';
 import { MapView } from '@/components/geo-visor/map-view';
+import { VehicleDetails } from './vehicle-details';
 
 import { Truck, Ship, Leaf, Globe, Bot, Send, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
@@ -62,7 +62,6 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
         title: 'AI Filter Generated',
         description: <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4"><code className="text-white">{result.filter}</code></pre>,
       });
-      // In a real app, you would parse `result.filter` and apply it to the `filters` state.
       setPopoverOpen(false);
       form.reset();
     } catch (error) {
@@ -78,7 +77,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
     setSidebarOpen(!isSidebarOpen);
     setTimeout(() => {
         mapRef.current?.resize();
-    }, 300); // match transition duration
+    }, 300);
   };
 
   const filteredVehicles = useMemo(() => {
@@ -139,18 +138,29 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
     }));
   }, [filteredVehicles]);
 
+  const handleVehicleClick = (vehicle: Vehicle) => {
+    if (selectedVehicle?.id === vehicle.id) {
+        setSelectedVehicle(null);
+    } else {
+        setSelectedVehicle(vehicle);
+    }
+  }
+
 
   return (
     <div className="flex h-full w-full">
       <aside className={cn(
-        "relative h-full shrink-0 overflow-y-auto border-r bg-background transition-[width,padding,border] duration-300 ease-in-out",
-        isSidebarOpen ? "w-full p-4 md:w-[420px]" : "w-0 p-0 border-transparent"
+        "relative h-full shrink-0 bg-background border-r transition-[width] duration-300 ease-in-out",
+        isSidebarOpen ? "w-full md:w-[420px]" : "w-0 border-transparent"
       )}>
-        <ScrollArea className={cn(
-          "h-full transition-opacity duration-300",
+        <div className={cn(
+          "h-full transition-opacity duration-300 overflow-hidden",
           isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}>
-            <div className="flex flex-col gap-6 pr-4">
+          {selectedVehicle ? (
+            <VehicleDetails vehicle={selectedVehicle} onBack={() => setSelectedVehicle(null)} />
+          ) : (
+            <div className="flex flex-col gap-6 p-4 overflow-y-auto h-full">
                 <div className="flex items-center justify-between gap-4">
                     <h2 className="text-lg font-bold tracking-tight">
                         Dashboard
@@ -215,7 +225,8 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                     />
                 )}
             </div>
-        </ScrollArea>
+          )}
+        </div>
       </aside>
 
       <main className="relative flex-1">
@@ -232,9 +243,8 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
           ref={mapRef}
           mapboxToken={mapboxToken}
           vehicles={filteredVehicles}
-          onVehicleClick={setSelectedVehicle}
+          onVehicleClick={handleVehicleClick}
           selectedVehicle={selectedVehicle}
-          onClosePopup={() => setSelectedVehicle(null)}
         />
         <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
             <PopoverTrigger asChild>

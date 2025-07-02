@@ -1,11 +1,13 @@
 import { Truck, Ship, TrainFront } from 'lucide-react';
 import type { Mode } from '@/types';
+import { cn } from '@/lib/utils';
 
 interface VehicleMarkerProps {
   mode: Mode;
+  isSelected?: boolean;
 }
 
-export function VehicleMarker({ mode }: VehicleMarkerProps) {
+export function VehicleMarker({ mode, isSelected = false }: VehicleMarkerProps) {
   const getIcon = () => {
     switch (mode) {
       case 'truck':
@@ -20,7 +22,12 @@ export function VehicleMarker({ mode }: VehicleMarkerProps) {
   };
 
   return (
-    <div className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-primary bg-background/80 text-primary shadow-lg backdrop-blur-sm transition-transform hover:scale-110">
+    <div className={cn(
+        "flex h-10 w-10 items-center justify-center rounded-full border-2 bg-background/80 shadow-lg backdrop-blur-sm transition-all hover:scale-110",
+        isSelected
+            ? "scale-110 border-accent text-accent ring-2 ring-accent ring-offset-2 ring-offset-background"
+            : "border-primary text-primary"
+    )}>
       {getIcon()}
     </div>
   );
