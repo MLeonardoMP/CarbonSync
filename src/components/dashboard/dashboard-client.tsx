@@ -1,24 +1,63 @@
 'use client';
 
-import { useMemo } from 'react';
-import { useUser } from '@/hooks/use-user';
+import React, { useState, useMemo } from 'react';
 import { vehicles } from '@/lib/data';
-import type { Vehicle, Mode } from '@/types';
+import type { Vehicle, Mode, Region, Carrier } from '@/types';
+import { useUser } from '@/hooks/use-user';
+import { useToast } from '@/hooks/use-toast';
+import { filterDataWithNaturalLanguage } from '@/ai/flows/filter-data-with-natural-language';
+
 import { StatsCard } from './stats-card';
 import { EmissionsChart } from './emissions-chart';
-import { Truck, Ship, TrainFront, Leaf, Globe } from 'lucide-react';
+import { FilterBar } from '@/components/geo-visor/filter-bar';
+import { MapView } from '@/components/geo-visor/map-view';
+import { VehicleInfoPanel } from '@/components/geo-visor/vehicle-info-panel';
+
+import { Truck, Ship, Leaf, Globe } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-export function DashboardClient() {
-  const { role, carrier } = useUser();
+export function DashboardClient({ apiKey }: { apiKey: string }) {
+  const { role, carrier: userCarrier } = useUser();
+  const { toast } = useToast();
+
+  const [filters, setFilters] = useState({
+    mode: 'all' as Mode | 'all',
+    region: 'all' as Region | 'all',
+    carrier: 'all' as Carrier | 'all',
+    emissions: 10,
+  });
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
+
+  const handleAiSearch = async (query: string) => {
+    try {
+      const result = await filterDataWithNaturalLanguage({ query });
+      toast({
+        title: 'AI Filter Generated',
+        description: <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4"><code className="text-white">{result.filter}</code></pre>,
+      });
+      // In a real app, you would parse `result.filter` and apply it to the `filters` state.
+    } catch (error) {
+      toast({
+        variant: 'destructive',
+        title: 'AI Search Failed',
+        description: 'Could not process the natural language query.',
+      });
+    }
+  };
 
   const filteredVehicles = useMemo(() => {
-    if (role === 'carrier' && carrier) {
-      return vehicles.filter((v) => v.carrier === carrier);
-    }
-    return vehicles;
-  }, [role, carrier]);
-
+    return vehicles.filter(v => {
+      if (role === 'carrier' && userCarrier && v.carrier !== userCarrier) {
+        return false;
+      }
+      if (filters.mode !== 'all' && v.mode !== filters.mode) return false;
+      if (filters.region !== 'all' && v.region !== filters.region) return false;
+      if (role !== 'carrier' && filters.carrier !== 'all' && v.carrier !== filters.carrier) return false;
+      if (v.co2e > filters.emissions) return false;
+      return true;
+    });
+  }, [filters, role, userCarrier]);
+  
   const totalEmissions = useMemo(
     () => filteredVehicles.reduce((acc, v) => acc + v.co2e, 0).toFixed(2),
     [filteredVehicles]
@@ -38,14 +77,15 @@ export function DashboardClient() {
   }, [filteredVehicles]);
 
   const emissionsByCarrier = useMemo(() => {
-    const carriers = [...new Set(vehicles.map(v => v.carrier))];
+    const carriers = [...new Set(filteredVehicles.map(v => v.carrier))];
     return carriers.map(carrierName => ({
       name: carrierName,
-      emissions: vehicles
+      emissions: filteredVehicles
         .filter(v => v.carrier === carrierName)
         .reduce((acc, v) => acc + v.co2e, 0),
     }));
-  }, []);
+  }, [filteredVehicles]);
+
 
   return (
     <div className="space-y-6">
@@ -71,10 +111,10 @@ export function DashboardClient() {
           title="Total CO2e Emissions"
           value={`${totalEmissions} tons`}
           icon={Leaf}
-          description="Across all shipments"
+          description="Based on current filters"
         />
         <StatsCard
-          title="Total Active Vehicles"
+          title="Filtered Vehicles"
           value={String(totalVehicles)}
           icon={Truck}
           description="Currently in transit"
@@ -92,24 +132,42 @@ export function DashboardClient() {
           description="Completed this month"
         />
       </div>
-      <div className="grid gap-4 md:grid-cols-2">
-        <EmissionsChart
-          data={emissionsByMode}
-          title="Emissions by Transport Mode"
-          xAxisKey="name"
-          dataKeys={['emissions']}
-          colors={['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondary))']}
-        />
-        {role !== 'carrier' && (
-          <EmissionsChart
-            data={emissionsByCarrier}
-            title="Emissions by Carrier"
-            xAxisKey="name"
-            dataKeys={['emissions']}
-            colors={['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondary))', '#a855f7']}
-          />
-        )}
+
+      <FilterBar filters={filters} setFilters={setFilters} onAiSearch={handleAiSearch} />
+
+      <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
+        <div className="lg:col-span-2 h-[500px] rounded-lg border shadow-sm overflow-hidden">
+            <MapView
+                apiKey={apiKey}
+                vehicles={filteredVehicles}
+                onVehicleClick={setSelectedVehicle}
+            />
+        </div>
+        <div className="lg:col-span-1 space-y-4">
+             <EmissionsChart
+                data={emissionsByMode}
+                title="Emissions by Transport Mode"
+                xAxisKey="name"
+                dataKeys={['emissions']}
+                colors={['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondary))']}
+             />
+             {role !== 'carrier' && (
+                <EmissionsChart
+                    data={emissionsByCarrier}
+                    title="Emissions by Carrier"
+                    xAxisKey="name"
+                    dataKeys={['emissions']}
+                    colors={['hsl(var(--primary))', 'hsl(var(--accent))', 'hsl(var(--secondary))', '#a855f7']}
+                />
+            )}
+        </div>
       </div>
+
+      <VehicleInfoPanel
+          vehicle={selectedVehicle}
+          isOpen={!!selectedVehicle}
+          onOpenChange={(open) => !open && setSelectedVehicle(null)}
+      />
     </div>
   );
 }

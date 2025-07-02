@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
-import { UserCircle, LineChart, Map, Bot, Calculator, Menu, LogOut } from 'lucide-react';
+import { UserCircle, Map, Bot, Calculator, Menu, LogOut } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import type { UserRole, Carrier } from '@/types';
 import { Logo } from '@/components/icons/logo';
@@ -24,8 +24,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 const carriers: Carrier[] = ['EcoHaul', 'SwiftTrans', 'AquaGlide', 'RailForward'];
 
 const navItems = [
-  { href: '/dashboard', icon: LineChart, label: 'Dashboard' },
-  { href: '/geo-visor', icon: Map, label: 'Geo-Visor' },
+  { href: '/dashboard', icon: Map, label: 'Dashboard' },
   { href: '/route-optimizer', icon: Bot, label: 'Route Optimizer' },
   { href: '/co2-calculator', icon: Calculator, label: 'CO2 Calculator' },
 ];
@@ -60,7 +59,7 @@ export function Header() {
               href={item.href}
               className={cn(
                 'text-sm font-medium transition-colors hover:text-primary',
-                pathname === item.href
+                pathname.startsWith(item.href)
                   ? 'text-primary'
                   : 'text-muted-foreground'
               )}
@@ -100,7 +99,7 @@ export function Header() {
                       onClick={() => setOpen(false)}
                       className={cn(
                           'flex items-center gap-4 px-2.5',
-                          pathname === item.href ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                          pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground hover:text-foreground"
                       )}
                     >
                       <item.icon className="h-5 w-5" />
