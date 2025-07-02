@@ -205,7 +205,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                           <CardContent className="space-y-4">
                             {result.suggestedRoutes.length === 0 && <p className="text-sm text-muted-foreground">No alternative routes could be generated.</p>}
                             {result.suggestedRoutes.map((s, i) => (
-                                <Card key={`suggestion-${i}`} onClick={() => setSelectedSuggestion(s)} className={cn("cursor-pointer transition-all", selectedSuggestion?.routeDescription === s.routeDescription ? "border-primary ring-2 ring-ring" : "border-border hover:border-primary/50")}>
+                                <Card key={`suggestion-${i}`} onClick={() => setSelectedSuggestion(s)} className={cn("cursor-pointer transition-colors", selectedSuggestion?.routeDescription === s.routeDescription ? "border-primary bg-muted/40" : "border-border hover:border-primary/60")}>
                                 <CardHeader className="p-4"><CardTitle className="text-base">Option {i + 1}</CardTitle><p className="text-xs text-muted-foreground">{s.routeDescription}</p></CardHeader>
                                 <CardContent className="grid gap-3 p-4 pt-0 sm:grid-cols-3">
                                     <div className="flex items-center gap-2"><Wind className="h-4 w-4 text-accent" /><div><p className="text-xs font-medium">{s.estimatedCO2eEmissions} kg</p><p className="text-xs text-muted-foreground">CO2e</p></div></div>

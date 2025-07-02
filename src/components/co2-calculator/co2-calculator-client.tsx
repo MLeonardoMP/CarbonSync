@@ -246,7 +246,7 @@ export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
                                 <CardTitle>Total Estimated Emissions</CardTitle>
                                 </CardHeader>
                                 <CardContent>
-                                    <p className="text-4xl font-bold text-primary">
+                                    <p className="text-3xl font-bold text-primary">
                                         {result.totalCO2eEmissions.toLocaleString()} kg
                                     </p>
                                     <p className="text-muted-foreground">CO2 Equivalent</p>

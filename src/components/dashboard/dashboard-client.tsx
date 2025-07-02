@@ -94,7 +94,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
         <ScrollArea className="h-full">
             <div className="flex flex-col gap-6 pr-4">
                 <div className="flex items-center justify-between gap-4">
-                    <h2 className="text-2xl font-bold tracking-tight">
+                    <h2 className="text-xl font-bold tracking-tight">
                         Dashboard
                     </h2>
                     <div className="flex items-center space-x-2">
