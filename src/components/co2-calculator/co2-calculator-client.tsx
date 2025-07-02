@@ -1,9 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useForm, useFieldArray } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import Map, { Source, Layer, Marker } from 'react-map-gl';
+import type { FeatureCollection } from 'geojson';
+
 import { calculateCo2Emissions, type CalculateCo2EmissionsOutput } from '@/ai/flows/calculate-co2-emissions';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Calculator, PlusCircle, Trash2, Wind, Route, TrendingUp } from 'lucide-react';
+import { Calculator, PlusCircle, Trash2, Wind, Route, TrendingUp, MapPin } from 'lucide-react';
 
 const legSchema = z.object({
   origin: z.string().min(2, 'Origin is required.'),
@@ -27,7 +30,7 @@ const calculatorSchema = z.object({
 
 type CalculatorFormValues = z.infer<typeof calculatorSchema>;
 
-export function CO2CalculatorClient() {
+export function CO2CalculatorClient({ mapboxToken }: { mapboxToken: string }) {
   const [result, setResult] = useState<CalculateCo2EmissionsOutput | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +61,26 @@ export function CO2CalculatorClient() {
       setIsLoading(false);
     }
   };
+
+  const geoJsonData: FeatureCollection | null = useMemo(() => {
+    if (!result) return null;
+    
+    const features = result.emissionBreakdown.flatMap(leg => ([
+      {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'LineString',
+          coordinates: [
+            [leg.originCoordinates.lon, leg.originCoordinates.lat],
+            [leg.destinationCoordinates.lon, leg.destinationCoordinates.lat]
+          ]
+        }
+      }
+    ]));
+
+    return { type: 'FeatureCollection', features };
+  }, [result]);
 
   return (
     <div className="grid gap-8 lg:grid-cols-3">
@@ -165,77 +188,110 @@ export function CO2CalculatorClient() {
         </Card>
       </div>
 
-      <div className="lg:col-span-2">
-         <h3 className="mb-4 text-xl font-semibold">Calculation Result</h3>
-         <div className="space-y-4">
-            {isLoading && (
-                 <Card>
-                    <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
-                    <CardContent className="space-y-4">
-                        <Skeleton className="h-10 w-full" />
-                        <Skeleton className="h-20 w-full" />
-                    </CardContent>
-                 </Card>
+      <div className="lg:col-span-2 space-y-4">
+        <div className="h-[400px] rounded-lg border shadow-sm overflow-hidden bg-card">
+          <Map
+            mapboxAccessToken={mapboxToken}
+            initialViewState={{ longitude: -30, latitude: 35, zoom: 1.5 }}
+            mapStyle="mapbox://styles/mapbox/dark-v11"
+          >
+            {geoJsonData && (
+              <Source id="route-data" type="geojson" data={geoJsonData}>
+                <Layer
+                  id="route-lines"
+                  type="line"
+                  paint={{
+                    'line-color': 'hsl(var(--primary))',
+                    'line-width': 3,
+                    'line-dasharray': [2, 2]
+                  }}
+                />
+              </Source>
             )}
-            {error && <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
-            
-            {result && (
-                <>
-                 <Card className="text-center">
-                    <CardHeader>
-                       <CardTitle>Total Estimated Emissions</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-4xl font-bold text-primary">
-                            {result.totalCO2eEmissions.toLocaleString()} kg
-                        </p>
-                        <p className="text-muted-foreground">CO2 Equivalent</p>
-                    </CardContent>
-                 </Card>
-                 <Card>
-                    <CardHeader><CardTitle>Emissions Breakdown</CardTitle></CardHeader>
-                    <CardContent className="space-y-4">
-                        {result.emissionBreakdown.map((leg, i) => (
-                             <div key={i} className="rounded-md border p-4">
-                                <p className="font-semibold">{leg.legDescription}</p>
-                                <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-3">
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <Wind className="h-4 w-4 text-primary" />
-                                        <div>
-                                            <p className="font-medium">{leg.estimatedCO2eEmissions.toLocaleString()} kg</p>
-                                            <p className="text-xs text-muted-foreground">CO2e</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <Route className="h-4 w-4 text-primary" />
-                                         <div>
-                                            <p className="font-medium">{leg.distanceKm.toLocaleString()} km</p>
-                                            <p className="text-xs text-muted-foreground">Distance</p>
-                                        </div>
-                                    </div>
-                                    { leg.distanceKm > 0 &&
-                                    <div className="flex items-center gap-2 text-sm">
-                                        <TrendingUp className="h-4 w-4 text-primary" />
-                                        <div>
-                                            <p className="font-medium">{(leg.estimatedCO2eEmissions / leg.distanceKm).toFixed(2)} kg/km</p>
-                                            <p className="text-xs text-muted-foreground">Intensity</p>
-                                        </div>
-                                    </div>
-                                    }
-                                </div>
-                            </div>
-                        ))}
-                    </CardContent>
-                 </Card>
-                </>
-            )}
+            {result?.emissionBreakdown.map((leg, i) => (
+              <React.Fragment key={i}>
+                <Marker longitude={leg.originCoordinates.lon} latitude={leg.originCoordinates.lat}>
+                  <MapPin className="h-6 w-6 text-primary" fill="hsl(var(--primary))" stroke="hsl(var(--background))"/>
+                </Marker>
+                <Marker longitude={leg.destinationCoordinates.lon} latitude={leg.destinationCoordinates.lat}>
+                  <MapPin className="h-6 w-6 text-primary" fill="hsl(var(--primary))" stroke="hsl(var(--background))"/>
+                </Marker>
+              </React.Fragment>
+            ))}
+          </Map>
+        </div>
+        <div>
+          <h3 className="mb-4 text-xl font-semibold">Calculation Result</h3>
+          <div className="space-y-4">
+              {isLoading && (
+                  <Card>
+                      <CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader>
+                      <CardContent className="space-y-4">
+                          <Skeleton className="h-10 w-full" />
+                          <Skeleton className="h-20 w-full" />
+                      </CardContent>
+                  </Card>
+              )}
+              {error && <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
+              
+              {result && (
+                  <>
+                  <Card className="text-center">
+                      <CardHeader>
+                        <CardTitle>Total Estimated Emissions</CardTitle>
+                      </CardHeader>
+                      <CardContent>
+                          <p className="text-4xl font-bold text-primary">
+                              {result.totalCO2eEmissions.toLocaleString()} kg
+                          </p>
+                          <p className="text-muted-foreground">CO2 Equivalent</p>
+                      </CardContent>
+                  </Card>
+                  <Card>
+                      <CardHeader><CardTitle>Emissions Breakdown</CardTitle></CardHeader>
+                      <CardContent className="space-y-4">
+                          {result.emissionBreakdown.map((leg, i) => (
+                              <div key={i} className="rounded-md border p-4">
+                                  <p className="font-semibold">{leg.legDescription}</p>
+                                  <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-3">
+                                      <div className="flex items-center gap-2 text-sm">
+                                          <Wind className="h-4 w-4 text-primary" />
+                                          <div>
+                                              <p className="font-medium">{leg.estimatedCO2eEmissions.toLocaleString()} kg</p>
+                                              <p className="text-xs text-muted-foreground">CO2e</p>
+                                          </div>
+                                      </div>
+                                      <div className="flex items-center gap-2 text-sm">
+                                          <Route className="h-4 w-4 text-primary" />
+                                          <div>
+                                              <p className="font-medium">{leg.distanceKm.toLocaleString()} km</p>
+                                              <p className="text-xs text-muted-foreground">Distance</p>
+                                          </div>
+                                      </div>
+                                      { leg.distanceKm > 0 &&
+                                      <div className="flex items-center gap-2 text-sm">
+                                          <TrendingUp className="h-4 w-4 text-primary" />
+                                          <div>
+                                              <p className="font-medium">{(leg.estimatedCO2eEmissions / leg.distanceKm).toFixed(2)} kg/km</p>
+                                              <p className="text-xs text-muted-foreground">Intensity</p>
+                                          </div>
+                                      </div>
+                                      }
+                                  </div>
+                              </div>
+                          ))}
+                      </CardContent>
+                  </Card>
+                  </>
+              )}
 
-            {!isLoading && !result && !error && (
-                 <div className="flex h-64 items-center justify-center rounded-lg border-2 border-dashed bg-card text-center">
-                    <p className="text-muted-foreground">Enter journey details to calculate emissions.</p>
-                 </div>
-            )}
-         </div>
+              {!isLoading && !result && !error && (
+                  <div className="flex h-32 items-center justify-center rounded-lg border-2 border-dashed bg-card text-center">
+                      <p className="text-muted-foreground">Results will be displayed here.</p>
+                  </div>
+              )}
+          </div>
+        </div>
       </div>
     </div>
   );

@@ -45,11 +45,12 @@ const RouteSuggestionSchema = z.object({
   estimatedCost: z
     .number()
     .describe('The estimated cost for the route in USD.'),
+  routeGeometry: z.string().describe('A GeoJSON LineString object representing the suggested route path as a JSON string. For example: \'{"type":"LineString","coordinates":[[lon1,lat1],[lon2,lat2],...]}\''),
 });
 
 const SuggestEmissionOptimizedRoutesOutputSchema = z.object({
   suggestions: z.array(RouteSuggestionSchema).describe(
-    'A list of suggested routes, optimized for emissions, including descriptions, estimated emissions, travel time, and cost.'
+    'A list of suggested routes, optimized for emissions, including descriptions, estimated emissions, travel time, cost, and a GeoJSON geometry string for map visualization.'
   ),
 });
 export type SuggestEmissionOptimizedRoutesOutput = z.infer<
@@ -77,7 +78,7 @@ Cargo Weight (tons): {{{cargoWeightTons}}}
 Fuel Type: {{{fuelType}}}
 Priority: {{{priority}}}
 
-Suggest routes optimized for the priority provided, including a description of the route, the estimated CO2e emissions in kilograms, the estimated travel time, and the estimated cost in USD.`,
+Suggest routes optimized for the priority provided. For each route, include a description, the estimated CO2e emissions in kilograms, the estimated travel time, the estimated cost in USD, and a GeoJSON LineString object as a string in the 'routeGeometry' field to represent the path on a map.`,
 });
 
 const suggestEmissionOptimizedRoutesFlow = ai.defineFlow(

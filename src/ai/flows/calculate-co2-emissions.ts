@@ -29,6 +29,8 @@ const LegEmissionSchema = z.object({
     legDescription: z.string().describe('A description of the journey leg (e.g., "Truck from A to B").'),
     estimatedCO2eEmissions: z.number().describe('The estimated CO2e emissions for the leg in kilograms.'),
     distanceKm: z.number().describe('The estimated distance of the leg in kilometers.'),
+    originCoordinates: z.object({ lat: z.number(), lon: z.number() }).describe('The geographical coordinates (latitude, longitude) of the origin.'),
+    destinationCoordinates: z.object({ lat: z.number(), lon: z.number() }).describe('The geographical coordinates (latitude, longitude) of the destination.'),
 });
 
 const CalculateCo2EmissionsOutputSchema = z.object({
@@ -55,9 +57,10 @@ You will be provided with a series of journey legs, each with an origin, destina
 Use standard emission factors for each mode of transport. If cargo weight is provided, factor it into the calculation. If it's not, use an average for that mode.
 First, for each leg, estimate the distance in kilometers between the origin and destination.
 Then, calculate the CO2e emissions for that leg.
+For each leg, you must also provide the estimated latitude and longitude for both the origin and destination points.
 Finally, sum up the emissions for all legs to get the total.
 
-Provide a breakdown of emissions for each leg, including a description of the leg, the estimated distance, and the estimated CO2e emissions. Also provide the total CO2e for the entire journey.
+Provide a breakdown of emissions for each leg, including a description of the leg, the estimated distance, the estimated CO2e emissions, and coordinates. Also provide the total CO2e for the entire journey.
 
 Journey Legs:
 {{#each legs}}
