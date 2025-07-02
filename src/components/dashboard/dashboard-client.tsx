@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -88,14 +89,14 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
 
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col gap-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <h2 className="text-2xl font-bold tracking-tight">
           Welcome, <span className="capitalize">{role}</span>!
         </h2>
         <div className="flex items-center space-x-2">
             <Select defaultValue="month">
-                <SelectTrigger className="w-[180px]">
+                <SelectTrigger className="w-full sm:w-[180px]">
                     <SelectValue placeholder="Select time range" />
                 </SelectTrigger>
                 <SelectContent>
@@ -106,44 +107,45 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
             </Select>
         </div>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <StatsCard
-          title="Total CO2e Emissions"
-          value={`${totalEmissions} tons`}
-          icon={Leaf}
-          description="Based on current filters"
-        />
-        <StatsCard
-          title="Filtered Vehicles"
-          value={String(totalVehicles)}
-          icon={Truck}
-          description="Currently in transit"
-        />
-         <StatsCard
-          title="Carbon Intensity"
-          value="125 g/ton-km"
-          icon={Globe}
-          description="Average across network"
-        />
-         <StatsCard
-          title="Total Shipments"
-          value="1,234"
-          icon={Ship}
-          description="Completed this month"
-        />
-      </div>
-
+      
       <FilterBar filters={filters} setFilters={setFilters} onAiSearch={handleAiSearch} />
 
-      <div className="grid gap-4 grid-cols-1 lg:grid-cols-3">
-        <div className="lg:col-span-2 h-[500px] rounded-lg border shadow-sm overflow-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+        <div className="lg:col-span-3 h-[calc(100vh-theme(spacing.48))] rounded-lg border shadow-sm overflow-hidden">
             <MapView
                 mapboxToken={mapboxToken}
                 vehicles={filteredVehicles}
                 onVehicleClick={setSelectedVehicle}
             />
         </div>
-        <div className="lg:col-span-1 space-y-4">
+        <div className="lg:col-span-2 space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+                <StatsCard
+                  title="Total CO2e Emissions"
+                  value={`${totalEmissions} tons`}
+                  icon={Leaf}
+                  description="Based on current filters"
+                />
+                <StatsCard
+                  title="Filtered Vehicles"
+                  value={String(totalVehicles)}
+                  icon={Truck}
+                  description="Currently in transit"
+                />
+                 <StatsCard
+                  title="Carbon Intensity"
+                  value="125 g/ton-km"
+                  icon={Globe}
+                  description="Average across network"
+                />
+                 <StatsCard
+                  title="Total Shipments"
+                  value="1,234"
+                  icon={Ship}
+                  description="Completed this month"
+                />
+            </div>
+            
              <EmissionsChart
                 data={emissionsByMode}
                 title="Emissions by Transport Mode"

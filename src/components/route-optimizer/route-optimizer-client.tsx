@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo } from 'react';
@@ -116,85 +117,8 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
 
   return (
     <div className="grid gap-8 lg:grid-cols-3">
-      <div className="lg:col-span-1">
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Bot className="h-5 w-5" />
-              Route Optimizer
-            </CardTitle>
-            <CardDescription>Enter details to find the most efficient routes.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <FormField
-                  control={form.control}
-                  name="origin"
-                  render={({ field }) => (
-                    <FormItem><FormLabel>Origin</FormLabel><FormControl><Input placeholder="e.g., Port of Los Angeles" {...field} /></FormControl><FormMessage /></FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="destination"
-                  render={({ field }) => (
-                    <FormItem><FormLabel>Destination</FormLabel><FormControl><Input placeholder="e.g., Chicago Railyard" {...field} /></FormControl><FormMessage /></FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="modeOfTransport"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mode of Transport</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Select mode" /></SelectTrigger></FormControl>
-                        <SelectContent>
-                          <SelectItem value="truck">Truck</SelectItem>
-                          <SelectItem value="rail">Rail</SelectItem>
-                          <SelectItem value="sea">Sea</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="cargoWeightTons"
-                  render={({ field }) => (
-                    <FormItem><FormLabel>Cargo Weight (tons)</FormLabel><FormControl><Input type="number" placeholder="Optional, e.g., 20" {...field} /></FormControl><FormMessage /></FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="priority"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Optimization Priority</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue placeholder="Select priority" /></SelectTrigger></FormControl>
-                        <SelectContent>
-                          <SelectItem value="emissions">Lowest Emissions</SelectItem>
-                          <SelectItem value="cost">Lowest Cost</SelectItem>
-                          <SelectItem value="speed">Fastest Route</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? 'Optimizing...' : 'Find Routes'}
-                </Button>
-              </form>
-            </Form>
-          </CardContent>
-        </Card>
-      </div>
-      <div className="lg:col-span-2 space-y-4">
-        <div className="h-[400px] rounded-lg border shadow-sm overflow-hidden bg-card">
+      <div className="lg:col-span-2">
+        <div className="h-[calc(100vh-theme(spacing.32))] rounded-lg border shadow-sm overflow-hidden bg-card">
             <Map
                 mapboxAccessToken={mapboxToken}
                 initialViewState={{ longitude: -98, latitude: 39, zoom: 3 }}
@@ -230,53 +154,132 @@ export function RouteOptimizerClient({ mapboxToken }: { mapboxToken: string }) {
              )}
             </Map>
         </div>
-        <div className="space-y-4">
-            <h3 className="text-xl font-semibold">Suggested Routes</h3>
-            {error && <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
-            
-            {isLoading && Array.from({ length: 2 }).map((_, i) => (
-                <Card key={i}><CardContent className="p-6 space-y-4"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-full" /></CardContent></Card>
-            ))}
-            {suggestions.map((s, i) => (
-                <Card 
-                    key={i} 
-                    onClick={() => setSelectedSuggestion(s)}
-                    className={cn("cursor-pointer transition-all", selectedSuggestion?.routeDescription === s.routeDescription ? "border-primary ring-2 ring-primary" : "border-border")}
-                >
-                <CardHeader>
-                    <CardTitle>Option {i + 1}</CardTitle>
-                    <p className="text-sm text-muted-foreground">{s.routeDescription}</p>
-                </CardHeader>
-                <CardContent className="grid gap-4 sm:grid-cols-3">
-                    <div className="flex items-center gap-2">
-                    <Wind className="h-5 w-5 text-primary" />
-                    <div>
-                        <p className="text-sm font-medium">{s.estimatedCO2eEmissions} kg</p>
-                        <p className="text-xs text-muted-foreground">CO2e Emissions</p>
+      </div>
+      <div className="lg:col-span-1">
+        <div className="flex flex-col gap-4 max-h-[calc(100vh-theme(spacing.32))]">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Bot className="h-5 w-5" />
+                  Route Optimizer
+                </CardTitle>
+                <CardDescription>Enter details to find the most efficient routes.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+                    <FormField
+                      control={form.control}
+                      name="origin"
+                      render={({ field }) => (
+                        <FormItem><FormLabel>Origin</FormLabel><FormControl><Input placeholder="e.g., Port of Los Angeles" {...field} /></FormControl><FormMessage /></FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="destination"
+                      render={({ field }) => (
+                        <FormItem><FormLabel>Destination</FormLabel><FormControl><Input placeholder="e.g., Chicago Railyard" {...field} /></FormControl><FormMessage /></FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="modeOfTransport"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Mode of Transport</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select mode" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              <SelectItem value="truck">Truck</SelectItem>
+                              <SelectItem value="rail">Rail</SelectItem>
+                              <SelectItem value="sea">Sea</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="cargoWeightTons"
+                      render={({ field }) => (
+                        <FormItem><FormLabel>Cargo Weight (tons)</FormLabel><FormControl><Input type="number" placeholder="Optional, e.g., 20" {...field} /></FormControl><FormMessage /></FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="priority"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Optimization Priority</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue placeholder="Select priority" /></SelectTrigger></FormControl>
+                            <SelectContent>
+                              <SelectItem value="emissions">Lowest Emissions</SelectItem>
+                              <SelectItem value="cost">Lowest Cost</SelectItem>
+                              <SelectItem value="speed">Fastest Route</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? 'Optimizing...' : 'Find Routes'}
+                    </Button>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
+            <div className="flex-1 overflow-y-auto space-y-4 pr-2">
+                <h3 className="text-xl font-semibold sticky top-0 bg-background py-2">Suggested Routes</h3>
+                {error && <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
+                
+                {isLoading && Array.from({ length: 2 }).map((_, i) => (
+                    <Card key={i}><CardContent className="p-6 space-y-4"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-full" /><Skeleton className="h-4 w-full" /></CardContent></Card>
+                ))}
+                {suggestions.map((s, i) => (
+                    <Card 
+                        key={i} 
+                        onClick={() => setSelectedSuggestion(s)}
+                        className={cn("cursor-pointer transition-all", selectedSuggestion?.routeDescription === s.routeDescription ? "border-primary ring-2 ring-primary" : "border-border")}
+                    >
+                    <CardHeader>
+                        <CardTitle>Option {i + 1}</CardTitle>
+                        <p className="text-sm text-muted-foreground">{s.routeDescription}</p>
+                    </CardHeader>
+                    <CardContent className="grid gap-4 sm:grid-cols-3">
+                        <div className="flex items-center gap-2">
+                        <Wind className="h-5 w-5 text-primary" />
+                        <div>
+                            <p className="text-sm font-medium">{s.estimatedCO2eEmissions} kg</p>
+                            <p className="text-xs text-muted-foreground">CO2e Emissions</p>
+                        </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                        <Clock className="h-5 w-5 text-primary" />
+                        <div>
+                            <p className="text-sm font-medium">{s.estimatedTime}</p>
+                            <p className="text-xs text-muted-foreground">Est. Time</p>
+                        </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                        <DollarSign className="h-5 w-5 text-primary" />
+                        <div>
+                            <p className="text-sm font-medium">${s.estimatedCost.toLocaleString()}</p>
+                            <p className="text-xs text-muted-foreground">Est. Cost</p>
+                        </div>
+                        </div>
+                    </CardContent>
+                    </Card>
+                ))}
+                {!isLoading && suggestions.length === 0 && !error && (
+                    <div className="flex h-64 items-center justify-center rounded-lg border-2 border-dashed bg-card text-center">
+                    <p className="text-muted-foreground">Enter details to find optimized routes.</p>
                     </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-primary" />
-                    <div>
-                        <p className="text-sm font-medium">{s.estimatedTime}</p>
-                        <p className="text-xs text-muted-foreground">Est. Time</p>
-                    </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                    <DollarSign className="h-5 w-5 text-primary" />
-                    <div>
-                        <p className="text-sm font-medium">${s.estimatedCost.toLocaleString()}</p>
-                        <p className="text-xs text-muted-foreground">Est. Cost</p>
-                    </div>
-                    </div>
-                </CardContent>
-                </Card>
-            ))}
-            {!isLoading && suggestions.length === 0 && !error && (
-                <div className="flex h-64 items-center justify-center rounded-lg border-2 border-dashed bg-card text-center">
-                <p className="text-muted-foreground">Enter details to find optimized routes.</p>
-                </div>
-            )}
+                )}
+            </div>
         </div>
       </div>
     </div>
