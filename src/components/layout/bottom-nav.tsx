@@ -1,6 +1,7 @@
+
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -33,6 +34,12 @@ const navItems = [
 export function BottomNav() {
   const pathname = usePathname();
   const { role, setRole, carrier, setCarrier } = useUser();
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
 
   const handleRoleChange = (newRole: string) => {
     setRole(newRole as UserRole);
@@ -82,6 +89,7 @@ export function BottomNav() {
 
         <div className="flex items-center gap-4">
           <div className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
+            {isClient && (
              <a
               href="https://gearsmap.com"
               target="_blank"
@@ -91,6 +99,7 @@ export function BottomNav() {
               <span className="font-medium">Powered by</span>
               <GearsmapLogo className="h-5 w-5" />
             </a>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
