@@ -17,7 +17,7 @@ import { EmissionsChart } from './emissions-chart';
 import { FilterBar } from '@/components/geo-visor/filter-bar';
 import { MapView } from '@/components/geo-visor/map-view';
 
-import { Truck, Ship, Leaf, Globe, Bot } from 'lucide-react';
+import { Truck, Ship, Leaf, Globe, Bot, Send } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
@@ -201,38 +201,62 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                     <span className="sr-only">AI Assistant</span>
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-96 rounded-sm" align="end">
-                <div className="grid gap-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium leading-none">AI Assistant</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Use natural language to filter vehicle data.
-                    </p>
+            <PopoverContent className="w-96 rounded-lg p-0" align="end">
+              <div className="flex h-[450px] flex-col">
+                <div className="border-b p-4">
+                  <h4 className="font-medium leading-none">AI Assistant</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Use natural language to filter map data.
+                  </p>
+                </div>
+                <div className="flex-1 overflow-y-auto p-4">
+                  <div className="flex h-full items-center justify-center">
+                    <div className="text-center">
+                        <Bot className="mx-auto h-8 w-8 text-muted-foreground" />
+                        <p className="mt-2 text-sm text-muted-foreground">
+                            Ask me to filter data. For example: "Show all trucks in Europe"
+                        </p>
+                    </div>
                   </div>
+                </div>
+                <div className="border-t bg-background p-4">
                   <Form {...form}>
-                      <form onSubmit={form.handleSubmit(handleAiSearch)} className="flex flex-col gap-4">
+                    <form onSubmit={form.handleSubmit(handleAiSearch)} className="flex items-start gap-2">
                       <FormField
-                          control={form.control}
-                          name="query"
-                          render={({ field }) => (
-                          <FormItem>
-                              <FormControl>
-                              <Input placeholder="e.g., show trucks in Europe over 5 tons" {...field} className="rounded-sm" />
-                              </FormControl>
-                              <FormMessage />
+                        control={form.control}
+                        name="query"
+                        render={({ field }) => (
+                          <FormItem className="flex-1">
+                            <FormControl>
+                              <Input 
+                                placeholder="Type your message..." 
+                                {...field} 
+                                className="rounded-md" 
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' && !e.shiftKey) {
+                                    e.preventDefault();
+                                    if (form.formState.isValid) {
+                                      form.handleSubmit(handleAiSearch)();
+                                    }
+                                  }
+                                }}
+                              />
+                            </FormControl>
+                            <FormMessage className="text-xs" />
                           </FormItem>
-                          )}
+                        )}
                       />
-                      <Button type="submit" disabled={isSubmitting} className="rounded-sm">
-                          {isSubmitting ? 'Searching...' : 'Apply Filter'}
+                      <Button type="submit" disabled={isSubmitting} size="icon" className="h-10 w-10 shrink-0 rounded-md">
+                        <Send className="h-4 w-4" />
+                        <span className="sr-only">Send</span>
                       </Button>
-                      </form>
+                    </form>
                   </Form>
                 </div>
+              </div>
             </PopoverContent>
         </Popover>
       </main>
     </div>
   );
 }
-
