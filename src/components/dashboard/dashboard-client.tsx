@@ -1,6 +1,10 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
 import { vehicles } from '@/lib/data';
 import type { Vehicle, Mode, Region, Carrier } from '@/types';
 import { useUser } from '@/hooks/use-user';
@@ -12,13 +16,29 @@ import { EmissionsChart } from './emissions-chart';
 import { FilterBar } from '@/components/geo-visor/filter-bar';
 import { MapView } from '@/components/geo-visor/map-view';
 
-import { Truck, Ship, Leaf, Globe } from 'lucide-react';
+import { Truck, Ship, Leaf, Globe, Bot } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+
+const searchSchema = z.object({
+  query: z.string().min(3, 'Query must be at least 3 characters'),
+});
+
 
 export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
   const { role, carrier: userCarrier } = useUser();
   const { toast } = useToast();
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+
+  const form = useForm<z.infer<typeof searchSchema>>({
+    resolver: zodResolver(searchSchema),
+    defaultValues: { query: '' },
+  });
+  const { isSubmitting } = form.formState;
 
   const [filters, setFilters] = useState({
     mode: 'all' as Mode | 'all',
@@ -28,14 +48,16 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
   });
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
-  const handleAiSearch = async (query: string) => {
+  const handleAiSearch = async (values: z.infer<typeof searchSchema>) => {
     try {
-      const result = await filterDataWithNaturalLanguage({ query });
+      const result = await filterDataWithNaturalLanguage({ query: values.query });
       toast({
         title: 'AI Filter Generated',
         description: <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4"><code className="text-white">{result.filter}</code></pre>,
       });
       // In a real app, you would parse `result.filter` and apply it to the `filters` state.
+      setDialogOpen(false);
+      form.reset();
     } catch (error) {
       toast({
         variant: 'destructive',
@@ -89,7 +111,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
 
   return (
     <div className="flex h-full w-full">
-      <aside className="relative z-10 h-full w-full shrink-0 overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
+      <aside className="h-full w-full shrink-0 overflow-y-auto border-r bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
         <ScrollArea className="h-full">
             <div className="flex flex-col gap-6 pr-4">
                 <div className="flex items-center justify-between gap-4">
@@ -110,7 +132,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                     </div>
                 </div>
                 
-                <FilterBar filters={filters} setFilters={setFilters} onAiSearch={handleAiSearch} />
+                <FilterBar filters={filters} setFilters={setFilters} />
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <StatsCard
@@ -167,6 +189,45 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
           selectedVehicle={selectedVehicle}
           onClosePopup={() => setSelectedVehicle(null)}
         />
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+            <DialogTrigger asChild>
+                <Button 
+                    variant="secondary" 
+                    size="icon" 
+                    className="absolute bottom-6 right-6 z-10 h-14 w-14 rounded-full shadow-lg"
+                >
+                    <Bot className="h-6 w-6" />
+                    <span className="sr-only">AI Assistant</span>
+                </Button>
+            </DialogTrigger>
+            <DialogContent className="sm:max-w-[425px]">
+                <DialogHeader>
+                    <DialogTitle>AI Assistant</DialogTitle>
+                    <DialogDescription>
+                    Use natural language to filter vehicle data. e.g., "Show me all trucks in Europe with emissions over 5 tons".
+                    </DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleAiSearch)} className="flex flex-col gap-4">
+                    <FormField
+                        control={form.control}
+                        name="query"
+                        render={({ field }) => (
+                        <FormItem>
+                            <FormControl>
+                            <Input placeholder="e.g., trucks in Europe over 5 tons" {...field} className="rounded-sm" />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                        )}
+                    />
+                    <Button type="submit" disabled={isSubmitting} className="rounded-sm">
+                        {isSubmitting ? 'Searching...' : 'Apply Filter'}
+                    </Button>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
       </main>
     </div>
   );

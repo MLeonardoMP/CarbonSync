@@ -5,24 +5,9 @@ import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Slider } from '@/components/ui/slider';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import { Bot } from 'lucide-react';
 import { vehicles } from '@/lib/data';
 import type { Mode, Region, Carrier } from '@/types';
 import { useUser } from '@/hooks/use-user';
-import { useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
 
 type Filters = {
   mode: Mode | 'all';
@@ -34,36 +19,17 @@ type Filters = {
 interface FilterBarProps {
   filters: Filters;
   setFilters: React.Dispatch<React.SetStateAction<Filters>>;
-  onAiSearch: (query: string) => Promise<void>;
 }
 
 const modes = ['all', ...[...new Set(vehicles.map((v) => v.mode))]];
 const regions = ['all', ...[...new Set(vehicles.map((v) => v.region))]];
 const carriers = ['all', ...[...new Set(vehicles.map((v) => v.carrier))]];
 
-const searchSchema = z.object({
-  query: z.string().min(3, 'Query must be at least 3 characters'),
-});
-
-export function FilterBar({ filters, setFilters, onAiSearch }: FilterBarProps) {
+export function FilterBar({ filters, setFilters }: FilterBarProps) {
   const { role } = useUser();
-  const [dialogOpen, setDialogOpen] = React.useState(false);
-
-  const form = useForm<z.infer<typeof searchSchema>>({
-    resolver: zodResolver(searchSchema),
-    defaultValues: { query: '' },
-  });
-
-  const { isSubmitting } = form.formState;
 
   const handleFilterChange = (key: keyof Filters, value: string | number) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
-  };
-
-  const handleSearchSubmit = async (values: z.infer<typeof searchSchema>) => {
-    await onAiSearch(values.query);
-    setDialogOpen(false);
-    form.reset();
   };
 
   return (
@@ -95,42 +61,6 @@ export function FilterBar({ filters, setFilters, onAiSearch }: FilterBarProps) {
           />
         </div>
       </div>
-      
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogTrigger asChild>
-          <Button variant="outline" className="w-full rounded-sm">
-            <Bot className="mr-2 h-4 w-4" />
-            AI Assistant
-          </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>AI Assistant</DialogTitle>
-            <DialogDescription>
-              Use natural language to filter vehicle data. e.g., "Show me all trucks in Europe with emissions over 5 tons".
-            </DialogDescription>
-          </DialogHeader>
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSearchSubmit)} className="flex flex-col gap-4">
-              <FormField
-                control={form.control}
-                name="query"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <Input placeholder="e.g., trucks in Europe over 5 tons" {...field} className="rounded-sm" />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isSubmitting} className="rounded-sm">
-                {isSubmitting ? 'Searching...' : 'Apply Filter'}
-              </Button>
-            </form>
-          </Form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
