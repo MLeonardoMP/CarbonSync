@@ -15,6 +15,14 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 type Filters = {
   mode: Mode | 'all';
@@ -39,6 +47,8 @@ const searchSchema = z.object({
 
 export function FilterBar({ filters, setFilters, onAiSearch }: FilterBarProps) {
   const { role } = useUser();
+  const [dialogOpen, setDialogOpen] = React.useState(false);
+
   const form = useForm<z.infer<typeof searchSchema>>({
     resolver: zodResolver(searchSchema),
     defaultValues: { query: '' },
@@ -52,22 +62,24 @@ export function FilterBar({ filters, setFilters, onAiSearch }: FilterBarProps) {
 
   const handleSearchSubmit = async (values: z.infer<typeof searchSchema>) => {
     await onAiSearch(values.query);
+    setDialogOpen(false);
+    form.reset();
   };
 
   return (
-    <div className="flex flex-col gap-4 rounded-lg border bg-card p-4 shadow-sm">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+    <div className="flex flex-col gap-3 rounded-none border bg-card p-3 shadow-sm">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <Select value={filters.mode} onValueChange={(v) => handleFilterChange('mode', v)}>
-          <SelectTrigger><SelectValue placeholder="Mode" /></SelectTrigger>
+          <SelectTrigger className="rounded-sm"><SelectValue placeholder="Mode" /></SelectTrigger>
           <SelectContent>{modes.map(m => <SelectItem key={m} value={m} className="capitalize">{m}</SelectItem>)}</SelectContent>
         </Select>
         <Select value={filters.region} onValueChange={(v) => handleFilterChange('region', v)}>
-          <SelectTrigger><SelectValue placeholder="Region" /></SelectTrigger>
+          <SelectTrigger className="rounded-sm"><SelectValue placeholder="Region" /></SelectTrigger>
           <SelectContent>{regions.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
         </Select>
         {role !== 'carrier' && (
           <Select value={filters.carrier} onValueChange={(v) => handleFilterChange('carrier', v)}>
-            <SelectTrigger><SelectValue placeholder="Carrier" /></SelectTrigger>
+            <SelectTrigger className="rounded-sm"><SelectValue placeholder="Carrier" /></SelectTrigger>
             <SelectContent>{carriers.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
           </Select>
         )}
@@ -83,27 +95,42 @@ export function FilterBar({ filters, setFilters, onAiSearch }: FilterBarProps) {
           />
         </div>
       </div>
-      <div className="my-2 h-px w-full bg-border" />
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSearchSubmit)} className="flex w-full flex-col gap-2 sm:flex-row">
-          <FormField
-            control={form.control}
-            name="query"
-            render={({ field }) => (
-              <FormItem className="flex-1">
-                <FormControl>
-                  <Input placeholder="AI: 'trucks in Europe over 5 tons'" {...field} />
-                </FormControl>
-                 <FormMessage className="text-xs" />
-              </FormItem>
-            )}
-          />
-          <Button type="submit" disabled={isSubmitting}>
+      
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogTrigger asChild>
+          <Button variant="outline" className="w-full rounded-sm">
             <Bot className="mr-2 h-4 w-4" />
-            {isSubmitting ? 'Searching...' : 'Search'}
+            AI Assistant
           </Button>
-        </form>
-      </Form>
+        </DialogTrigger>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>AI Assistant</DialogTitle>
+            <DialogDescription>
+              Use natural language to filter vehicle data. e.g., "Show me all trucks in Europe with emissions over 5 tons".
+            </DialogDescription>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSearchSubmit)} className="flex flex-col gap-4">
+              <FormField
+                control={form.control}
+                name="query"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <Input placeholder="e.g., trucks in Europe over 5 tons" {...field} className="rounded-sm" />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <Button type="submit" disabled={isSubmitting} className="rounded-sm">
+                {isSubmitting ? 'Searching...' : 'Apply Filter'}
+              </Button>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
