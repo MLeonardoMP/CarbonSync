@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -89,62 +88,64 @@ export function BottomNav() {
 
         <div className="flex items-center gap-4">
           {isClient && (
-            <div className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
-              <a
-                href="https://gearsmap.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center gap-2 opacity-80 transition-opacity hover:opacity-100"
-              >
-                <span className="font-medium">Powered by</span>
-                <GearsmapLogo className="h-5 w-5" />
-              </a>
-            </div>
-          )}
-          <div className="flex items-center gap-2">
-            <ThemeToggle />
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
-                    <UserCircle />
-                    <span className="sr-only">Toggle user menu</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent className="w-56" align="end" side="top">
-                <DropdownMenuLabel className="font-normal">
-                    <div className="flex flex-col space-y-1">
-                        <p className="text-sm font-medium leading-none capitalize">{role}</p>
-                        <p className="text-xs leading-none text-muted-foreground">
-                            {carrier ? `${carrier} - ` : ''}{role}@carbonsync.com
-                        </p>
-                    </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuLabel>Switch Role</DropdownMenuLabel>
-                <DropdownMenuRadioGroup value={role} onValueChange={handleRoleChange}>
-                  <DropdownMenuRadioItem value="admin">Admin</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="analyst">Analyst</DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="carrier">Carrier</DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-                {role === 'carrier' && (
-                  <>
+            <>
+              <div className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
+                <a
+                  href="https://gearsmap.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 opacity-80 transition-opacity hover:opacity-100"
+                >
+                  <span className="font-medium">Powered by</span>
+                  <GearsmapLogo className="h-5 w-5" />
+                </a>
+              </div>
+              <div className="flex items-center gap-2">
+                <ThemeToggle />
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+                        <UserCircle />
+                        <span className="sr-only">Toggle user menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" side="top">
+                    <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                            <p className="text-sm font-medium leading-none capitalize">{role}</p>
+                            <p className="text-xs leading-none text-muted-foreground">
+                                {carrier ? `${carrier} - ` : ''}{role}@carbonsync.com
+                            </p>
+                        </div>
+                    </DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                     <DropdownMenuLabel>Switch Carrier</DropdownMenuLabel>
-                    <DropdownMenuRadioGroup value={carrier || ''} onValueChange={handleCarrierChange}>
-                      {carriers.map(c => (
-                        <DropdownMenuRadioItem key={c} value={c}>{c}</DropdownMenuRadioItem>
-                      ))}
+                    <DropdownMenuLabel>Switch Role</DropdownMenuLabel>
+                    <DropdownMenuRadioGroup value={role} onValueChange={handleRoleChange}>
+                      <DropdownMenuRadioItem value="admin">Admin</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="analyst">Analyst</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="carrier">Carrier</DropdownMenuRadioItem>
                     </DropdownMenuRadioGroup>
-                  </>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    <span>Log out</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
+                    {role === 'carrier' && (
+                      <>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuLabel>Switch Carrier</DropdownMenuLabel>
+                        <DropdownMenuRadioGroup value={carrier || ''} onValueChange={handleCarrierChange}>
+                          {carriers.map(c => (
+                            <DropdownMenuRadioItem key={c} value={c}>{c}</DropdownMenuRadioItem>
+                          ))}
+                        </DropdownMenuRadioGroup>
+                      </>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        <span>Log out</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </footer>
