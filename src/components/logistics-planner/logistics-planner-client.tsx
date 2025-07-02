@@ -141,8 +141,8 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
   }, [result]);
 
   return (
-    <div className="flex h-full w-full">
-      <aside className="h-full w-full max-w-sm shrink-0 overflow-y-auto border-r border-border/50 bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
+    <div className="flex h-[calc(100vh-theme(spacing.14))] w-full">
+      <aside className="h-full w-full shrink-0 overflow-y-auto border-r border-border/50 bg-background p-4 md:w-[420px]">
         <ScrollArea className="h-full">
             <div className="flex flex-col gap-6 pr-4">
                 <Card>
@@ -195,7 +195,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                             <CardContent className="space-y-4">
                                 <div className="text-center rounded-md bg-muted p-4">
                                     <p className="text-sm text-muted-foreground">Total Estimated Emissions</p>
-                                    <p className="text-2xl font-bold text-primary">
+                                    <p className="text-xl font-bold text-primary">
                                         {result.calculatedRoute.totalCO2eEmissions.toLocaleString()} kg
                                     </p>
                                 </div>

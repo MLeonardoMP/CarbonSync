@@ -47,75 +47,53 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-50 flex h-14 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 md:px-6">
-      <div className="flex items-center gap-6">
-        <Link href="/" className="flex items-center gap-2 font-semibold">
-          <Logo className="h-6 w-6 text-primary" />
-          <span className="hidden font-bold sm:inline-block">CarbonSync</span>
-        </Link>
-        <nav className="hidden items-center gap-5 md:flex">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                'text-sm font-medium transition-colors hover:text-primary',
-                pathname.startsWith(item.href)
-                  ? 'text-primary'
-                  : 'text-muted-foreground'
-              )}
-            >
-              {item.label}
-            </Link>
-          ))}
-        </nav>
+    <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-background/60 sm:px-6">
+      <div className="sm:hidden">
+        <Sheet open={open} onOpenChange={setOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="icon">
+              <Menu className="h-6 w-6" />
+              <span className="sr-only">Toggle Menu</span>
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="left" className="w-full max-w-xs">
+            <nav className="grid gap-6 text-lg font-medium">
+              <Link
+                href="/"
+                className="flex items-center gap-2 text-lg font-semibold"
+                onClick={() => setOpen(false)}
+              >
+                <Logo className="h-6 w-6 text-primary" />
+                <span className="font-bold">CarbonSync</span>
+              </Link>
+              {navItems.map((item) => (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    'flex items-center gap-4 px-2.5',
+                    pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground hover:text-foreground"
+                  )}
+                >
+                  <item.icon className="h-5 w-5" />
+                  {item.label}
+                </Link>
+              ))}
+            </nav>
+          </SheetContent>
+        </Sheet>
+      </div>
+
+      <div className="hidden sm:block">
+        {/* Placeholder for breadcrumbs or other header content */}
       </div>
 
       <div className="flex items-center gap-2">
-         <div className="md:hidden">
-            <Sheet open={open} onOpenChange={setOpen}>
-              <SheetTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                >
-                  <Menu className="h-5 w-5" />
-                  <span className="sr-only">Toggle Menu</span>
-                </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-full max-w-xs sm:max-w-xs">
-                <nav className="grid gap-6 text-lg font-medium">
-                  <Link
-                    href="/"
-                    className="flex items-center gap-2 text-lg font-semibold"
-                    onClick={() => setOpen(false)}
-                  >
-                    <Logo className="h-6 w-6 text-primary" />
-                    <span className="font-bold">CarbonSync</span>
-                  </Link>
-                  {navItems.map((item) => (
-                    <Link
-                      key={item.href}
-                      href={item.href}
-                      onClick={() => setOpen(false)}
-                      className={cn(
-                          'flex items-center gap-4 px-2.5',
-                          pathname.startsWith(item.href) ? "text-foreground" : "text-muted-foreground hover:text-foreground"
-                      )}
-                    >
-                      <item.icon className="h-5 w-5" />
-                      {item.label}
-                    </Link>
-                  ))}
-                </nav>
-              </SheetContent>
-            </Sheet>
-         </div>
-
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="secondary" size="icon" className="rounded-full">
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
                 <UserCircle className="h-5 w-5" />
                 <span className="sr-only">Toggle user menu</span>
             </Button>

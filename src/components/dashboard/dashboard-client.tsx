@@ -111,8 +111,8 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
 
 
   return (
-    <div className="flex h-full w-full">
-      <aside className="h-full w-full shrink-0 overflow-y-auto border-r bg-background/80 p-4 backdrop-blur-sm md:w-[420px]">
+    <div className="flex h-[calc(100vh-theme(spacing.14))] w-full">
+      <aside className="h-full w-full shrink-0 overflow-y-auto border-r bg-background p-4 md:w-[420px]">
         <ScrollArea className="h-full">
             <div className="flex flex-col gap-6 pr-4">
                 <div className="flex items-center justify-between gap-4">
@@ -195,16 +195,16 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                 <Button 
                     variant="secondary" 
                     size="icon" 
-                    className="absolute bottom-6 right-6 z-10 h-14 w-14 rounded-full shadow-lg"
+                    className="absolute bottom-6 right-6 z-10 h-12 w-12 rounded-full shadow-lg"
                 >
-                    <Bot className="h-6 w-6" />
+                    <Bot className="h-5 w-5" />
                     <span className="sr-only">AI Assistant</span>
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-80 rounded-lg p-0" align="end">
               <div className="flex h-[400px] flex-col">
                 <div className="border-b p-3">
-                  <h4 className="text-base font-medium leading-none">AI Assistant</h4>
+                  <h4 className="text-sm font-medium leading-none">AI Assistant</h4>
                   <p className="text-xs text-muted-foreground">
                     Use natural language to filter map data.
                   </p>
@@ -213,13 +213,13 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                   <div className="flex h-full items-center justify-center">
                     <div className="text-center">
                         <Bot className="mx-auto h-8 w-8 text-muted-foreground" />
-                        <p className="mt-2 text-sm text-muted-foreground">
+                        <p className="mt-2 text-xs text-muted-foreground">
                             Ask me to filter data. For example: "Show all trucks in Europe"
                         </p>
                     </div>
                   </div>
                 </div>
-                <div className="border-t bg-background p-4">
+                <div className="border-t bg-background p-3">
                   <Form {...form}>
                     <form onSubmit={form.handleSubmit(handleAiSearch)} className="flex items-start gap-2">
                       <FormField
@@ -231,7 +231,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                               <Input 
                                 placeholder="Type your message..." 
                                 {...field} 
-                                className="rounded-md" 
+                                className="h-8 rounded-sm" 
                                 onKeyDown={(e) => {
                                   if (e.key === 'Enter' && !e.shiftKey) {
                                     e.preventDefault();
@@ -246,7 +246,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                           </FormItem>
                         )}
                       />
-                      <Button type="submit" disabled={isSubmitting} size="icon" className="h-9 w-9 shrink-0 rounded-md">
+                      <Button type="submit" disabled={isSubmitting} size="icon" className="h-8 w-8 shrink-0 rounded-sm">
                         <Send className="h-4 w-4" />
                         <span className="sr-only">Send</span>
                       </Button>
