@@ -1,0 +1,4 @@
+-añadir MCP 
+-añadir A2A y orquestación
+-Mayor velocidad cambiando de tabs
+
