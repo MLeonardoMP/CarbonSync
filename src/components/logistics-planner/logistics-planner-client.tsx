@@ -28,7 +28,6 @@ import { MapProjectionControl } from '@/components/geo-visor/map-projection-cont
 const legSchema = z.object({
   origin: z.string().min(2, 'Origin is required.'),
   destination: z.string().min(2, 'Destination is required.'),
-  modeOfTransport: z.enum(['truck', 'rail', 'sea', 'air']),
   cargoWeightTons: z.preprocess(
     (val) => (val === '' ? undefined : val),
     z.coerce.number().positive('Must be a positive number').optional()
@@ -37,7 +36,6 @@ const legSchema = z.object({
 
 const plannerSchema = z.object({
   legs: z.array(legSchema).min(1, 'At least one journey leg is required.'),
-  priority: z.enum(['emissions', 'cost', 'speed']),
 });
 
 type PlannerFormValues = z.infer<typeof plannerSchema>;
@@ -77,8 +75,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
   const form = useForm<PlannerFormValues>({
     resolver: zodResolver(plannerSchema),
     defaultValues: {
-      legs: [{ origin: '', destination: '', modeOfTransport: 'truck', cargoWeightTons: '' }],
-      priority: 'emissions',
+      legs: [{ origin: '', destination: '', cargoWeightTons: undefined }],
     },
   });
 
@@ -130,10 +127,10 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
   const renderSavings = (original: number, suggested: number) => {
     const difference = original - suggested;
     if (difference > 0) {
-        return <ArrowDown className="h-4 w-4 text-accent" title="Improvement" />;
+        return <ArrowDown className="h-4 w-4 text-accent" />;
     }
     if (difference < 0) {
-        return <ArrowUp className="h-4 w-4 text-destructive" title="Increase" />;
+        return <ArrowUp className="h-4 w-4 text-destructive" />;
     }
     return <div className="w-4 h-4" />; // Placeholder for alignment
   };
@@ -153,11 +150,11 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
         }
     }));
     
-    const suggestionFeatures: Feature<LineString>[] = result.suggestedRoutes.map((s) => {
+    const suggestionFeatures = result.suggestedRoutes.map((s) => {
         try {
             const geometry: LineString = JSON.parse(s.routeGeometry);
             return {
-                type: 'Feature',
+                type: 'Feature' as const,
                 properties: {
                     id: s.routeDescription,
                     type: 'suggestion',
@@ -169,7 +166,7 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
             console.error("Failed to parse route geometry", s.routeGeometry);
             return null;
         }
-    }).filter((f): f is Feature<LineString> => f !== null);
+    }).filter((f): f is NonNullable<typeof f> => f !== null);
 
     return { type: 'FeatureCollection' as const, features: [...userRouteFeatures, ...suggestionFeatures] };
   }, [result]);
@@ -205,15 +202,13 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                                   <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                                   <FormField control={form.control} name={`legs.${index}.origin`} render={({ field }) => (<FormItem><FormLabel>Origin</FormLabel><FormControl><Input placeholder="e.g., Shanghai" {...field} /></FormControl><FormMessage /></FormItem>)} />
                                   <FormField control={form.control} name={`legs.${index}.destination`} render={({ field }) => (<FormItem><FormLabel>Destination</FormLabel><FormControl><Input placeholder="e.g., Rotterdam" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                                  <FormField control={form.control} name={`legs.${index}.modeOfTransport`} render={({ field }) => (<FormItem><FormLabel>Transport Mode</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl><SelectContent><SelectItem value="truck">Truck</SelectItem><SelectItem value="rail">Rail</SelectItem><SelectItem value="sea">Sea</SelectItem><SelectItem value="air">Air</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
                                   <FormField control={form.control} name={`legs.${index}.cargoWeightTons`} render={({ field }) => (<FormItem><FormLabel>Weight (tons)</FormLabel><FormControl><Input type="number" placeholder="Optional" {...field} value={field.value ?? ''} /></FormControl><FormMessage /></FormItem>)} />
                                   </div>
                                   {fields.length > 1 && (<Button type="button" variant="ghost" size="icon" className="absolute -top-2 -right-2 h-6 w-6" onClick={() => remove(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>)}
                               </Card>
                               ))}
                           </div>
-                          <Button type="button" variant="outline" className="w-full" onClick={() => append({ origin: '', destination: '', modeOfTransport: 'truck', cargoWeightTons: '' })}><PlusCircle className="mr-2 h-4 w-4" />Add Leg</Button>
-                          <FormField control={form.control} name="priority" render={({ field }) => (<FormItem><FormLabel>Optimization Priority</FormLabel><Select onValueChange={field.onChange} defaultValue={field.value}><FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl><SelectContent><SelectItem value="emissions">Lowest Emissions</SelectItem><SelectItem value="cost">Lowest Cost</SelectItem><SelectItem value="speed">Fastest Route</SelectItem></SelectContent></Select><FormMessage /></FormItem>)} />
+                          <Button type="button" variant="outline" className="w-full" onClick={() => append({ origin: '', destination: '', cargoWeightTons: undefined })}><PlusCircle className="mr-2 h-4 w-4" />Add Leg</Button>
                           <Button type="submit" className="w-full" disabled={isLoading}>{isLoading ? 'Planning...' : 'Calculate & Optimize'}</Button>
                         </form>
                     </Form>
