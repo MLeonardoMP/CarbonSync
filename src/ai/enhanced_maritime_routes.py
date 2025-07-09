@@ -94,7 +94,20 @@ class PortFinder:
         "hong_kong": {"name": "Hong Kong", "lon": 114.2, "lat": 22.3, "country": "Hong Kong"},
         "dubai": {"name": "Dubai", "lon": 55.3, "lat": 25.3, "country": "UAE"},
         "new_york": {"name": "New York", "lon": -74.0, "lat": 40.7, "country": "USA"},
-        "yokohama": {"name": "Yokohama", "lon": 139.6, "lat": 35.4, "country": "Japan"}
+        "yokohama": {"name": "Yokohama", "lon": 139.6, "lat": 35.4, "country": "Japan"},
+        # African ports
+        "cape_town": {"name": "Cape Town", "lon": 18.4, "lat": -33.9, "country": "South Africa"},
+        "durban": {"name": "Durban", "lon": 31.0, "lat": -29.9, "country": "South Africa"},
+        "lagos": {"name": "Lagos", "lon": 3.4, "lat": 6.5, "country": "Nigeria"},
+        "alexandria": {"name": "Alexandria", "lon": 29.9, "lat": 31.2, "country": "Egypt"},
+        "casablanca": {"name": "Casablanca", "lon": -7.6, "lat": 33.6, "country": "Morocco"},
+        "dakar": {"name": "Dakar", "lon": -17.4, "lat": 14.7, "country": "Senegal"},
+        # Additional major ports
+        "mumbai": {"name": "Mumbai", "lon": 72.8, "lat": 19.1, "country": "India"},
+        "chennai": {"name": "Chennai", "lon": 80.3, "lat": 13.1, "country": "India"},
+        "sydney": {"name": "Sydney", "lon": 151.2, "lat": -33.9, "country": "Australia"},
+        "vancouver": {"name": "Vancouver", "lon": -123.1, "lat": 49.3, "country": "Canada"},
+        "santos": {"name": "Santos", "lon": -46.3, "lat": -23.9, "country": "Brazil"}
     }
     
     @staticmethod
@@ -122,6 +135,53 @@ class PortFinder:
         place_lower = place_name.lower().replace(" ", "_")
         return any(port_name in place_lower or place_lower in port_name 
                   for port_name in PortFinder.MAJOR_PORTS.keys())
+    
+    @staticmethod
+    def is_likely_coastal_city(place_name: str, coord: Coordinate) -> bool:
+        """
+        Check if a place is likely a coastal city that can serve as a port.
+        This includes both known major ports and other coastal cities.
+        """
+        # First check if it's a known port
+        if PortFinder.is_port_city(place_name):
+            return True
+        
+        # Check for common coastal city patterns in the name
+        coastal_indicators = [
+            "port", "harbor", "harbour", "bay", "beach", "coast", "marine", 
+            "naval", "marina", "wharf", "dock", "pier", "cape", "inlet"
+        ]
+        
+        place_lower = place_name.lower()
+        for indicator in coastal_indicators:
+            if indicator in place_lower:
+                return True
+        
+        # For major cities, we can also check if they're near the ocean
+        # This is a simplified check - a more sophisticated version could use 
+        # actual coastline data
+        major_coastal_cities = {
+            "cape town", "lagos", "alexandria", "casablanca", "dakar", "mombasa",
+            "freetown", "accra", "cotonou", "libreville", "douala", "luanda",
+            "maputo", "dar es salaam", "djibouti", "port said", "suez",
+            "tunis", "algiers", "rabat", "nouakchott", "conakry", "bissau",
+            "banjul", "praia", "sao tome", "malabo", "porto novo", "lome",
+            "abidjan", "yamoussoukro", "monrovia", "boston", "miami", "seattle",
+            "san francisco", "san diego", "portland", "charleston", "savannah",
+            "jacksonville", "tampa", "mobile", "new orleans", "galveston",
+            "corpus christi", "brownsville", "baltimore", "philadelphia",
+            "norfolk", "wilmington", "barcelona", "valencia", "bilbao",
+            "vigo", "cadiz", "malaga", "almeria", "cartagena", "palma",
+            "las palmas", "santa cruz", "marseille", "nice", "toulon",
+            "brest", "le havre", "calais", "dunkirk", "bordeaux", "nantes",
+            "saint nazaire", "genoa", "naples", "palermo", "venice", "trieste",
+            "livorno", "bari", "brindisi", "taranto", "catania", "messina",
+            "cagliari", "olbia", "porto torres", "piraeus", "thessaloniki",
+            "patras", "volos", "kavala", "alexandria", "istanbul", "izmir",
+            "mersin", "antalya", "trabzon", "samsun", "sinop", "zonguldak"
+        }
+        
+        return place_lower in major_coastal_cities
 
 def normalize_longitude_crossing(coordinates: List[List[float]]) -> List[List[float]]:
     """
@@ -260,22 +320,22 @@ class EnhancedRouteCalculator:
         
         if origin_is_port and destination_is_port:
             # Port to Port - Only sea route
-            route_description = f"Port to Port: {origin_name} → {destination_name}"
+            route_description = f"Port to Port: {origin_name} -> {destination_name}"
             segments = self._create_sea_route(origin_coord, destination_coord, origin_name, destination_name)
             
         elif not origin_is_port and not destination_is_port:
             # Inland to Inland - Land-Sea-Land route
-            route_description = f"Inland to Inland: {origin_name} → {destination_name}"
+            route_description = f"Inland to Inland: {origin_name} -> {destination_name}"
             segments = self._create_land_sea_land_route(origin_coord, destination_coord, origin_name, destination_name)
             
         elif origin_is_port and not destination_is_port:
             # Port to Inland - Sea-Land route
-            route_description = f"Port to Inland: {origin_name} → {destination_name}"
+            route_description = f"Port to Inland: {origin_name} -> {destination_name}"
             segments = self._create_sea_land_route(origin_coord, destination_coord, origin_name, destination_name)
             
         else:  # not origin_is_port and destination_is_port
             # Inland to Port - Land-Sea route
-            route_description = f"Inland to Port: {origin_name} → {destination_name}"
+            route_description = f"Inland to Port: {origin_name} -> {destination_name}"
             segments = self._create_land_sea_route(origin_coord, destination_coord, origin_name, destination_name)
         
         if not segments:
@@ -306,7 +366,7 @@ class EnhancedRouteCalculator:
             origin=origin,
             destination=destination,
             waypoints=waypoints,
-            description=f"Sea route: {origin_name} → {destination_name}",
+            description=f"Sea route: {origin_name} -> {destination_name}",
             distance_km=distance
         )]
     
@@ -332,7 +392,7 @@ class EnhancedRouteCalculator:
             origin=origin,
             destination=origin_port,
             waypoints=land_waypoints_1,
-            description=f"Land: {origin_name} → {origin_port_data['name']}",
+            description=f"Land: {origin_name} -> {origin_port_data['name']}",
             distance_km=self._calculate_distance(land_waypoints_1)
         ))
         
@@ -345,7 +405,7 @@ class EnhancedRouteCalculator:
                 origin=origin_port,
                 destination=destination_port,
                 waypoints=sea_waypoints,
-                description=f"Sea: {origin_port_data['name']} → {destination_port_data['name']}",
+                description=f"Sea: {origin_port_data['name']} -> {destination_port_data['name']}",
                 distance_km=self._calculate_distance(sea_waypoints)
             ))
         
@@ -356,7 +416,7 @@ class EnhancedRouteCalculator:
             origin=destination_port,
             destination=destination,
             waypoints=land_waypoints_2,
-            description=f"Land: {destination_port_data['name']} → {destination_name}",
+            description=f"Land: {destination_port_data['name']} -> {destination_name}",
             distance_km=self._calculate_distance(land_waypoints_2)
         ))
         
@@ -383,7 +443,7 @@ class EnhancedRouteCalculator:
                 origin=origin,
                 destination=destination_port,
                 waypoints=sea_waypoints,
-                description=f"Sea: {origin_name} → {destination_port_data['name']}",
+                description=f"Sea: {origin_name} -> {destination_port_data['name']}",
                 distance_km=self._calculate_distance(sea_waypoints)
             ))
         
@@ -394,7 +454,7 @@ class EnhancedRouteCalculator:
             origin=destination_port,
             destination=destination,
             waypoints=land_waypoints,
-            description=f"Land: {destination_port_data['name']} → {destination_name}",
+            description=f"Land: {destination_port_data['name']} -> {destination_name}",
             distance_km=self._calculate_distance(land_waypoints)
         ))
         
@@ -419,7 +479,7 @@ class EnhancedRouteCalculator:
             origin=origin,
             destination=origin_port,
             waypoints=land_waypoints,
-            description=f"Land: {origin_name} → {origin_port_data['name']}",
+            description=f"Land: {origin_name} -> {origin_port_data['name']}",
             distance_km=self._calculate_distance(land_waypoints)
         ))
         
@@ -435,7 +495,7 @@ class EnhancedRouteCalculator:
                 origin=origin_port,
                 destination=destination,
                 waypoints=sea_waypoints,
-                description=f"Sea: {origin_port_data['name']} → {destination_name}",
+                description=f"Sea: {origin_port_data['name']} -> {destination_name}",
                 distance_km=self._calculate_distance(sea_waypoints)
             ))
         
@@ -451,7 +511,7 @@ class EnhancedRouteCalculator:
             origin=origin,
             destination=destination,
             waypoints=waypoints,
-            description=f"Direct land route: {origin_name} → {destination_name}",
+            description=f"Direct land route: {origin_name} -> {destination_name}",
             distance_km=distance
         )]
     
@@ -516,7 +576,7 @@ if __name__ == "__main__":
     print("=== Enhanced Route Calculator Testing ===\n")
     
     for origin, destination in test_routes:
-        print(f"Calculating route: {origin} → {destination}")
+        print(f"Calculating route: {origin} -> {destination}")
         route = calculator.calculate_enhanced_route(origin, destination)
         
         if route:
