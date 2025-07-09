@@ -4,6 +4,8 @@
 
 import { spawn } from 'child_process';
 import path from 'path';
+import mbxClient from '@mapbox/mapbox-sdk';
+import mbxDirections from '@mapbox/mapbox-sdk/services/directions';
 
 export interface Coordinate {
   lon: number;
@@ -34,12 +36,49 @@ export interface EnhancedRouteResponse {
 
 export class EnhancedRouteService {
   private pythonScriptPath: string;
+  private mapboxClient: any;
+  private directionsService: any;
 
   constructor() {
     this.pythonScriptPath = path.join(process.cwd(), 'src', 'ai', 'enhanced_maritime_routes.py');
+    
+    // Initialize Mapbox client if token is available
+    const mapboxToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
+    if (mapboxToken) {
+      this.mapboxClient = mbxClient({ accessToken: mapboxToken });
+      this.directionsService = mbxDirections(this.mapboxClient);
+    }
   }
 
   async calculateEnhancedRoute(origin: string, destination: string): Promise<EnhancedRouteResponse> {
+    try {
+      // First get the route from Python script
+      const pythonResult = await this.calculatePythonRoute(origin, destination);
+      
+      if (!pythonResult.success || !pythonResult.route) {
+        return pythonResult;
+      }
+
+      // Enhance land segments with Mapbox routing if available
+      if (this.directionsService) {
+        const enhancedSegments = await this.enhanceLandSegments(pythonResult.route.segments);
+        pythonResult.route.segments = enhancedSegments;
+        
+        // Recalculate totals
+        pythonResult.route.total_distance_km = enhancedSegments.reduce((sum: number, segment: RouteSegment) => sum + segment.distance_km, 0);
+        pythonResult.route.total_waypoints = enhancedSegments.reduce((sum: number, segment: RouteSegment) => sum + segment.waypoints.length, 0);
+      }
+
+      return pythonResult;
+    } catch (error) {
+      return {
+        success: false,
+        error: `Route calculation failed: ${error}`
+      };
+    }
+  }
+
+  private async calculatePythonRoute(origin: string, destination: string): Promise<EnhancedRouteResponse> {
     return new Promise((resolve) => {
       // Try different Python commands based on the platform
       const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
@@ -89,6 +128,61 @@ export class EnhancedRouteService {
         });
       });
     });
+  }
+
+  private async enhanceLandSegments(segments: RouteSegment[]): Promise<RouteSegment[]> {
+    const enhancedSegments: RouteSegment[] = [];
+
+    for (const segment of segments) {
+      if (segment.type === 'land' && this.directionsService) {
+        try {
+          // Use Mapbox Directions API for land segments
+          const response = await this.directionsService.getDirections({
+            profile: 'driving',
+            waypoints: [
+              { coordinates: [segment.origin.lon, segment.origin.lat] },
+              { coordinates: [segment.destination.lon, segment.destination.lat] }
+            ],
+            geometries: 'geojson',
+            overview: 'full'
+          }).send();
+
+          const route = response.body.routes[0];
+          if (route) {
+            const distanceKm = route.distance / 1000; // Convert meters to kilometers
+            const durationHours = route.duration / 3600; // Convert seconds to hours
+            
+            // Calculate CO2 emissions for land transport (truck: ~150g CO2e per km)
+            const co2EmissionsKg = distanceKm * 0.15;
+
+            // Convert route geometry to waypoints
+            const waypoints: Coordinate[] = route.geometry.coordinates.map(([lon, lat]: [number, number]) => ({
+              lon,
+              lat
+            }));
+
+            enhancedSegments.push({
+              ...segment,
+              waypoints,
+              distance_km: distanceKm,
+              description: `${segment.description} (Enhanced: ${distanceKm.toFixed(1)} km, ${durationHours.toFixed(1)} hours, ${co2EmissionsKg.toFixed(2)} kg CO2e)`
+            });
+          } else {
+            // Fallback to original segment if Mapbox fails
+            enhancedSegments.push(segment);
+          }
+        } catch (error) {
+          console.error('Error enhancing land segment with Mapbox:', error);
+          // Fallback to original segment if Mapbox fails
+          enhancedSegments.push(segment);
+        }
+      } else {
+        // Keep sea segments unchanged
+        enhancedSegments.push(segment);
+      }
+    }
+
+    return enhancedSegments;
   }
 
   /**
