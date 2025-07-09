@@ -14,19 +14,11 @@ import {z} from 'genkit';
 const JourneyLegSchema = z.object({
   origin: z.string().describe('The starting point of the journey leg.'),
   destination: z.string().describe('The destination point of the journey leg.'),
-  modeOfTransport: z
-    .enum(['truck', 'rail', 'sea', 'air'])
-    .describe('The mode of transport for this leg.'),
   cargoWeightTons: z.number().optional().describe('The weight of the cargo in tons.'),
 });
 
 const PlanLogisticsJourneyInputSchema = z.object({
   legs: z.array(JourneyLegSchema).describe('The list of legs in the user-defined journey.'),
-  priority: z
-    .enum(['emissions', 'cost', 'speed'])
-    .describe(
-      'The priority for suggesting alternative routes.'
-    ),
 });
 export type PlanLogisticsJourneyInput = z.infer<typeof PlanLogisticsJourneyInputSchema>;
 
@@ -82,7 +74,8 @@ const prompt = ai.definePrompt({
 
 **Part 1: Calculate Emissions for User's Route**
 - For each leg in the provided journey, estimate the distance (km) and calculate the CO2e emissions (kg).
-- Use standard emission factors. Factor in cargo weight if provided.
+- Use standard emission factors and assume the most appropriate transport mode for each leg based on the origin and destination.
+- Factor in cargo weight if provided.
 - Provide the latitude and longitude for each origin and destination.
 - Sum the emissions for the total CO2e of the user's defined route.
 - Populate the 'calculatedRoute' object in the output.
@@ -90,17 +83,15 @@ const prompt = ai.definePrompt({
 **Part 2: Suggest Optimized Alternative Routes**
 - The overall journey is from the origin of the first leg to the destination of the last leg.
 - Suggest 2-3 alternative routes for this journey, which may include different modes of transport or intermediate stops.
-- These suggestions should be optimized based on the user's specified priority: '{{priority}}'.
+- These suggestions should be optimized for the lowest possible emissions while maintaining practicality.
 - For each suggestion, provide a description, estimated CO2e (kg), travel time, cost (USD), and a GeoJSON LineString geometry string for map visualization.
 - Populate the 'suggestedRoutes' array in the output.
 
 **User Input:**
 
-Journey Priority: {{priority}}
-
 Journey Legs:
 {{#each legs}}
-- Leg {{@index}}: {{modeOfTransport}} from {{origin}} to {{destination}}{{#if cargoWeightTons}} (Cargo: {{cargoWeightTons}} tons){{/if}}
+- Leg {{@index}}: From {{origin}} to {{destination}}{{#if cargoWeightTons}} (Cargo: {{cargoWeightTons}} tons){{/if}}
 {{/each}}
 `,
 });
