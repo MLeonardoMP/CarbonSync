@@ -202,6 +202,131 @@ Use the research data to provide realistic, current industry insights and make i
 Return the enhanced route with all calculated values, mode optimization recommendations, and strategic analysis.`,
 });
 
+// Utility function to handle AI API calls with retry logic
+async function callAIWithRetry<T>(
+  apiCall: () => Promise<T>,
+  maxRetries: number = 3,
+  baseDelay: number = 2000
+): Promise<T> {
+  let lastError: Error | null = null;
+  
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      return await apiCall();
+    } catch (error) {
+      lastError = error as Error;
+      
+      // Check if it's a 503 Service Unavailable error
+      if (error && typeof error === 'object' && 'message' in error) {
+        const errorMessage = (error as Error).message;
+        if (errorMessage.includes('503') || errorMessage.includes('overloaded') || errorMessage.includes('Service Unavailable')) {
+          console.warn(`AI service overloaded (attempt ${attempt + 1}/${maxRetries}). Retrying in ${baseDelay * Math.pow(2, attempt)}ms...`);
+          
+          // Wait before retrying with exponential backoff
+          if (attempt < maxRetries - 1) {
+            await new Promise(resolve => setTimeout(resolve, baseDelay * Math.pow(2, attempt)));
+            continue;
+          }
+        }
+      }
+      
+      // For other errors, don't retry
+      throw error;
+    }
+  }
+  
+  throw lastError || new Error('AI service failed after all retries');
+}
+
+// Generate fallback data when AI service is unavailable
+function generateFallbackRouteData(input: {
+  route: {
+    segments: Array<{
+      type: string;
+      description: string;
+      distance_km: number;
+      waypoints: Array<{ lon: number; lat: number }>;
+    }>;
+    total_distance_km: number;
+    total_waypoints: number;
+    route_description: string;
+  };
+  cargoWeightTons?: number;
+}): PlanEnhancedLogisticsJourneyOutput {
+  const route = input.route;
+  const cargoWeight = input.cargoWeightTons || 20; // Default 20 tons
+  
+  // Calculate basic estimates for each segment
+  const segments = route.segments.map((segment) => {
+    const isSeaSegment = segment.type === 'sea';
+    const distance = segment.distance_km;
+    
+    // Basic emission factors (kg CO2e per ton-km)
+    const emissionFactor = isSeaSegment ? 15 : 80; // Sea: 15, Land: 80
+    const segmentEmissions = distance * cargoWeight * emissionFactor / 1000; // Convert to kg
+    
+    // Basic time estimation
+    const avgSpeed = isSeaSegment ? 25 : 65; // km/h
+    const timeHours = distance / avgSpeed;
+    const estimatedTime = `${Math.round(timeHours)} hours`;
+    
+    // Basic cost estimation (USD per km)
+    const costPerKm = isSeaSegment ? 0.5 : 1.2;
+    const segmentCost = distance * costPerKm;
+    
+    return {
+      type: segment.type as 'sea' | 'land',
+      origin: segment.waypoints[0] || { lat: 0, lon: 0 },
+      destination: segment.waypoints[segment.waypoints.length - 1] || { lat: 0, lon: 0 },
+      waypoints: segment.waypoints || [],
+      description: segment.description || `${segment.type} segment`,
+      distance_km: distance,
+      estimatedCO2eEmissions: segmentEmissions,
+      estimatedTime,
+      estimatedCost: segmentCost,
+    };
+  });
+  
+  const totalEmissions = segments.reduce((sum: number, s) => sum + s.estimatedCO2eEmissions, 0);
+  const totalCost = segments.reduce((sum: number, s) => sum + s.estimatedCost, 0);
+  const totalTime = segments.reduce((sum: number, s) => sum + parseFloat(s.estimatedTime), 0);
+  
+  return {
+    calculatedRoute: {
+      segments,
+      total_distance_km: route.total_distance_km,
+      total_waypoints: route.total_waypoints,
+      route_description: route.route_description,
+      totalCO2eEmissions: totalEmissions,
+      totalEstimatedTime: `${Math.round(totalTime)} hours`,
+      totalEstimatedCost: totalCost,
+    },
+    routeGeometry: '', // Will be filled later
+    analysis: {
+      seaDistance: segments.filter((s) => s.type === 'sea').reduce((sum: number, s) => sum + s.distance_km, 0),
+      landDistance: segments.filter((s) => s.type === 'land').reduce((sum: number, s) => sum + s.distance_km, 0),
+      seaSegmentCount: segments.filter((s) => s.type === 'sea').length,
+      landSegmentCount: segments.filter((s) => s.type === 'land').length,
+      majorPorts: ['Port information unavailable - AI service temporarily unavailable'],
+      riskAssessment: {
+        overall: 'medium' as const,
+        factors: ['AI service temporarily unavailable - using basic risk assessment'],
+        mitigations: ['Monitor route conditions', 'Check for updates', 'Consider alternative timing']
+      },
+      optimizations: {
+        alternativeRoutes: ['AI service temporarily unavailable - detailed analysis pending'],
+        timingRecommendations: ['Consider off-peak hours', 'Monitor weather conditions'],
+        costSavingOpportunities: ['Bulk shipping discounts', 'Fuel optimization']
+      },
+      marketConditions: {
+        fuelPrices: 'Current data unavailable - AI service temporarily down',
+        portCongestion: 'Status unknown - AI service temporarily unavailable',
+        seasonalFactors: 'Analysis pending - AI service temporarily unavailable'
+      }
+    }
+  };
+}
+
 const planEnhancedLogisticsJourneyFlow = ai.defineFlow(
   {
     name: 'planEnhancedLogisticsJourneyFlow',
@@ -227,9 +352,11 @@ const planEnhancedLogisticsJourneyFlow = ai.defineFlow(
     outputSchema: PlanEnhancedLogisticsJourneyOutputSchema,
   },
   async (input) => {
-    // First, research the route to gather real-time logistics intelligence using Gemini 2.0's web access
-    const routeResearch = await ai.generate({
-      prompt: `Please search the web for current information about the following logistics route and provide actionable intelligence:
+    try {
+      // First, research the route to gather real-time logistics intelligence using Gemini 2.0's web access
+      const routeResearch = await callAIWithRetry(async () => {
+        return await ai.generate({
+          prompt: `Please search the web for current information about the following logistics route and provide actionable intelligence:
 
 Route: ${input.route.route_description}
 Segments: ${input.route.segments.map((s, i) => `${i+1}. ${s.type} - ${s.description}`).join(', ')}
@@ -253,21 +380,31 @@ Research Requirements:
 Focus on practical, current information that would directly impact routing decisions, costs, timing, and safety. Look for recent news, port authorities' announcements, shipping industry reports, and weather forecasts.
 
 Provide a comprehensive summary of findings that will help optimize the route planning.`,
-      model: 'googleai/gemini-2.0-flash',
-      config: {
-        temperature: 0.3,
-      },
-    });
+          model: 'googleai/gemini-2.0-flash',
+          config: {
+            temperature: 0.3,
+          },
+        });
+      }, 3, 2000);
 
-    const researchData = routeResearch.text || '';
+      const researchData = routeResearch.text || '';
 
-    // Now enhance the route with this research data
-    const { output } = await enhancedPrompt({
-      route: input.route,
-      cargoWeightTons: input.cargoWeightTons,
-      routeResearch: researchData
-    });
-    
-    return output!;
+      // Now enhance the route with this research data
+      const enhancedResult = await callAIWithRetry(async () => {
+        return await enhancedPrompt({
+          route: input.route,
+          cargoWeightTons: input.cargoWeightTons,
+          routeResearch: researchData
+        });
+      }, 3, 2000);
+      
+      return enhancedResult.output!;
+    } catch (error) {
+      console.error('AI service failed after retries, using fallback data:', error);
+      console.warn('Returning basic route calculations due to AI service unavailability');
+      
+      // Return fallback data when AI service is unavailable
+      return generateFallbackRouteData(input);
+    }
   }
 );
