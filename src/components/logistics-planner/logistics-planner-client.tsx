@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useRef } from 'react';
@@ -24,6 +23,7 @@ import { useUser } from '@/hooks/use-user';
 import { Separator } from '@/components/ui/separator';
 import { MapStyleControl } from '@/components/geo-visor/map-style-control';
 import { MapProjectionControl } from '@/components/geo-visor/map-projection-control';
+import { GearsmapLogo } from '@/components/icons/gearsmap-logo';
 
 const legSchema = z.object({
   origin: z.string().min(2, 'Origin is required.'),
@@ -181,7 +181,8 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
           "h-full transition-opacity duration-300",
           isSidebarOpen ? "opacity-100" : "opacity-0 pointer-events-none"
         )}>
-            <div className="flex flex-col gap-6 pr-4">
+            <div className="flex flex-col gap-6 pr-4 min-h-full">
+                <div className="flex-1">
                 <Card>
                     <CardHeader>
                     <CardTitle className="flex items-center gap-2">
@@ -214,104 +215,6 @@ export function LogisticsPlannerClient({ mapboxToken }: { mapboxToken: string })
                     </Form>
                     </CardContent>
                 </Card>
-
-                {/* RESULTS SECTION */}
-                <div className="space-y-4">
-                    {isLoading && (
-                        <Card><CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader><CardContent className="space-y-4"><Skeleton className="h-10 w-full" /><Skeleton className="h-20 w-full" /></CardContent></Card>
-                    )}
-                    {error && <Alert variant="destructive"><AlertTitle>Error</AlertTitle><AlertDescription>{error}</AlertDescription></Alert>}
-                    
-                    {result && (
-                      <>
-                        {/* User's Route Calculation */}
-                        <Card>
-                            <CardHeader><CardTitle>Your Route Calculation</CardTitle></CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="text-center rounded-md bg-muted p-4">
-                                    <p className="text-sm text-muted-foreground">Total Estimated Emissions</p>
-                                    <p className="text-xl font-bold text-primary">
-                                        {result.calculatedRoute.totalCO2eEmissions.toLocaleString()} kg
-                                    </p>
-                                </div>
-                                <p className="font-semibold text-sm">Emissions Breakdown</p>
-                                {result.calculatedRoute.emissionBreakdown.map((leg, i) => (
-                                    <div key={`breakdown-${i}`} className="rounded-md border p-3">
-                                        <p className="font-semibold text-sm">{leg.legDescription}</p>
-                                        <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-2">
-                                            <div className="flex items-center gap-2 text-xs"><Wind className="h-4 w-4 text-accent" /><span>{leg.estimatedCO2eEmissions.toLocaleString()} kg CO2e</span></div>
-                                            <div className="flex items-center gap-2 text-xs"><Route className="h-4 w-4 text-accent" /><span>{leg.distanceKm.toLocaleString()} km</span></div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </CardContent>
-                        </Card>
-                        
-                        {/* AI Suggestions */}
-                        <Card>
-                          <CardHeader><CardTitle>AI-Suggested Alternatives</CardTitle></CardHeader>
-                          <CardContent className="space-y-4">
-                            {result.suggestedRoutes.length === 0 && <p className="text-sm text-muted-foreground">No alternative routes could be generated.</p>}
-                            {result.suggestedRoutes.map((s, i) => (
-                                <Card key={`suggestion-${i}`} onClick={() => setSelectedSuggestion(s)} className={cn("cursor-pointer transition-shadow", selectedSuggestion?.routeDescription === s.routeDescription ? "ring-2 ring-primary" : "ring-1 ring-transparent hover:ring-1 hover:ring-primary/60")}>
-                                <CardHeader className="p-3"><CardTitle className="text-base">Option {i + 1}</CardTitle><p className="text-xs text-muted-foreground">{s.routeDescription}</p></CardHeader>
-                                <CardContent className="grid gap-3 p-3 pt-0 sm:grid-cols-3">
-                                    <div className="flex items-center gap-2"><Wind className="h-4 w-4 text-accent" /><div><p className="text-xs font-medium">{s.estimatedCO2eEmissions} kg</p><p className="text-xs text-muted-foreground">CO2e</p></div></div>
-                                    <div className="flex items-center gap-2"><Clock className="h-4 w-4 text-accent" /><div><p className="text-xs font-medium">{s.estimatedTime}</p><p className="text-xs text-muted-foreground">Time</p></div></div>
-                                    <div className="flex items-center gap-2"><DollarSign className="h-4 w-4 text-accent" /><div><p className="text-xs font-medium">${s.estimatedCost.toLocaleString()}</p><p className="text-xs text-muted-foreground">Cost</p></div></div>
-                                </CardContent>
-                                </Card>
-                            ))}
-                          </CardContent>
-                        </Card>
-
-                        {/* Comparison Summary */}
-                        {selectedSuggestion && (
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Comparison Summary</CardTitle>
-                                    <CardDescription>
-                                        Comparing your route with the selected AI suggestion.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-2">
-                                    <div className="grid grid-cols-4 items-center text-sm font-semibold text-muted-foreground">
-                                        <span className="col-span-2">Metric</span>
-                                        <span className="text-right">Your Route</span>
-                                        <span className="text-right">AI Suggestion</span>
-                                    </div>
-                                    <Separator />
-                                    <div className="grid grid-cols-4 items-center text-sm">
-                                        <span className="col-span-2">CO2e Emissions (kg)</span>
-                                        <span className="text-right font-medium">{result.calculatedRoute.totalCO2eEmissions.toLocaleString()}</span>
-                                        <span className="text-right font-medium flex justify-end items-center gap-1">
-                                            {selectedSuggestion.estimatedCO2eEmissions.toLocaleString()}
-                                            {renderSavings(result.calculatedRoute.totalCO2eEmissions, selectedSuggestion.estimatedCO2eEmissions)}
-                                        </span>
-                                    </div>
-                                    <Separator />
-                                    <div className="grid grid-cols-4 items-center text-sm">
-                                        <span className="col-span-2">Estimated Time</span>
-                                        <span className="text-right text-muted-foreground">N/A</span>
-                                        <span className="text-right font-medium">{selectedSuggestion.estimatedTime}</span>
-                                    </div>
-                                    <Separator />
-                                     <div className="grid grid-cols-4 items-center text-sm">
-                                        <span className="col-span-2">Estimated Cost (USD)</span>
-                                        <span className="text-right text-muted-foreground">N/A</span>
-                                        <span className="text-right font-medium">${selectedSuggestion.estimatedCost.toLocaleString()}</span>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        )}
-                      </>
-                    )}
-
-                    {!isLoading && !result && !error && (
-                        <div className="flex h-32 items-center justify-center rounded-lg border-2 border-dashed bg-card text-center">
-                            <p className="text-muted-foreground">Results will be displayed here.</p>
-                        </div>
-                    )}
                 </div>
             </div>
         </ScrollArea>

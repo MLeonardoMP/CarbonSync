@@ -16,17 +16,19 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { UserCircle, Map, Bot, LogOut, Menu } from 'lucide-react';
+import { UserCircle, Map, BarChart3, Bot, LogOut, Menu } from 'lucide-react';
 import { useUser } from '@/hooks/use-user';
 import type { UserRole, Carrier } from '@/types';
 import { Logo } from '@/components/icons/logo';
+import { GearsmapLogo } from '@/components/icons/gearsmap-logo';
 import { ThemeToggle } from './theme-toggle';
 import { cn } from '@/lib/utils';
 
 const carriers: Carrier[] = ['EcoHaul', 'SwiftTrans', 'AquaGlide', 'RailForward'];
 
 const navItems = [
-  { href: '/dashboard', icon: Map, label: 'Dashboard' },
+  { href: '/dashboard', icon: Map, label: 'Real Time' },
+  { href: '/historical-data', icon: BarChart3, label: 'Historical Data' },
   { href: '/logistics-planner', icon: Bot, label: 'Logistics Planner' },
 ];
 

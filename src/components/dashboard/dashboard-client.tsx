@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useRef } from 'react';
@@ -7,6 +6,7 @@ import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import type { MapRef } from 'react-map-gl';
 import { subDays, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, isWithinInterval } from 'date-fns';
+import type { Interval } from 'date-fns';
 
 import { vehicles } from '@/lib/data';
 import type { Vehicle, Mode, Region, Carrier } from '@/types';
@@ -26,6 +26,7 @@ import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { GearsmapLogo } from '@/components/icons/gearsmap-logo';
 import { cn } from '@/lib/utils';
 
 const searchSchema = z.object({
@@ -162,7 +163,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
             <div className="flex flex-col gap-6 p-4 overflow-y-auto h-full">
                 <div className="flex items-center justify-between gap-4">
                     <h2 className="text-lg font-bold tracking-tight">
-                        Dashboard
+                        Real Time
                     </h2>
                     <div className="flex items-center space-x-2">
                         <Select value={timeRange} onValueChange={(value) => setTimeRange(value as 'week' | 'month' | 'quarter')}>
@@ -223,6 +224,19 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                         colors={['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))']}
                     />
                 )}
+                
+                {/* Powered by footer */}
+                <div className="mt-auto pt-4 border-t">
+                    <a
+                        href="https://gearsmap.com"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group flex items-center justify-center gap-2 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                    >
+                        <span className="font-medium">Powered by</span>
+                        <GearsmapLogo className="h-4 w-4 transition-transform duration-200 group-hover:scale-110" />
+                    </a>
+                </div>
             </div>
           )}
         </div>

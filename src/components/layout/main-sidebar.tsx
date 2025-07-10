@@ -2,13 +2,14 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Map, Bot } from 'lucide-react';
+import { Map, BarChart3, Bot } from 'lucide-react';
 import { Logo } from '@/components/icons/logo';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const navItems = [
-  { href: '/dashboard', icon: Map, label: 'Dashboard' },
+  { href: '/dashboard', icon: Map, label: 'Real Time' },
+  { href: '/historical-data', icon: BarChart3, label: 'Historical Data' },
   { href: '/logistics-planner', icon: Bot, label: 'Logistics Planner' },
 ];
 
