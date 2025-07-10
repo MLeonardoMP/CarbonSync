@@ -108,15 +108,35 @@ export class EnhancedRouteService {
         }
 
         try {
-          const result = JSON.parse(outputData);
+          // Extract JSON from output - look for the first { and last } to isolate JSON
+          const lines = outputData.trim().split('\n');
+          let jsonString = '';
+          
+          // Find the line that starts with { - this should be our JSON
+          for (const line of lines) {
+            const trimmedLine = line.trim();
+            if (trimmedLine.startsWith('{') && trimmedLine.includes('"segments"')) {
+              jsonString = trimmedLine;
+              break;
+            }
+          }
+          
+          if (!jsonString) {
+            // Fallback: try to parse the entire output
+            jsonString = outputData.trim();
+          }
+          
+          const result = JSON.parse(jsonString);
           resolve({
             success: true,
             route: result
           });
         } catch (error) {
+          console.error('Python output:', outputData);
+          console.error('Parse error:', error);
           resolve({
             success: false,
-            error: `Failed to parse route data: ${error}`
+            error: `Failed to parse route data: ${error}. Output: ${outputData.substring(0, 200)}...`
           });
         }
       });
@@ -264,6 +284,81 @@ export class EnhancedRouteService {
     });
 
     return waypoints;
+  }
+
+  /**
+   * Validate route segments and identify potential issues
+   */
+  validateRoute(route: EnhancedRoute): {
+    isValid: boolean;
+    warnings: string[];
+    suggestions: string[];
+  } {
+    const warnings: string[] = [];
+    const suggestions: string[] = [];
+
+    // Check for extremely long segments that might indicate problematic routing
+    route.segments.forEach((segment, index) => {
+      if (segment.distance_km > 15000) {
+        warnings.push(`Segment ${index + 1}: Unusually long ${segment.type} segment (${segment.distance_km.toFixed(0)} km)`);
+        if (segment.type === 'sea') {
+          suggestions.push(`Consider breaking down the sea route via intermediate ports for segment ${index + 1}`);
+        } else {
+          suggestions.push(`Consider multimodal transport options for long land segment ${index + 1}`);
+        }
+      }
+
+      // Check for segments with very few waypoints (might indicate oversimplified routes)
+      if (segment.waypoints.length < 3 && segment.distance_km > 1000) {
+        warnings.push(`Segment ${index + 1}: Few waypoints for long distance might indicate oversimplified route`);
+        suggestions.push(`Request more detailed routing for segment ${index + 1} to avoid obstacles`);
+      }
+
+      // Check for potential International Date Line crossing issues
+      const lons = segment.waypoints.map(wp => wp.lon);
+      const hasDateLineCrossing = lons.some(lon => Math.abs(lon) > 170) && 
+                                  (Math.max(...lons) - Math.min(...lons)) > 180;
+      
+      if (hasDateLineCrossing) {
+        warnings.push(`Segment ${index + 1}: Potential International Date Line crossing detected`);
+        suggestions.push(`Verify routing accuracy for trans-Pacific segment ${index + 1}`);
+      }
+    });
+
+    // Check for inefficient sea-land-sea patterns
+    const segmentTypes = route.segments.map(s => s.type);
+    for (let i = 0; i < segmentTypes.length - 2; i++) {
+      if (segmentTypes[i] === 'sea' && segmentTypes[i+1] === 'land' && segmentTypes[i+2] === 'sea') {
+        const landSegment = route.segments[i+1];
+        if (landSegment.distance_km < 100) {
+          warnings.push(`Short land bridge detected between sea segments (${landSegment.distance_km.toFixed(0)} km)`);
+          suggestions.push(`Evaluate if sea route around this land bridge would be more efficient`);
+        }
+      }
+    }
+
+    // Check for balanced multimodal usage
+    const totalSeaDistance = route.segments
+      .filter(s => s.type === 'sea')
+      .reduce((sum, s) => sum + s.distance_km, 0);
+    
+    const totalLandDistance = route.segments
+      .filter(s => s.type === 'land')
+      .reduce((sum, s) => sum + s.distance_km, 0);
+
+    const seaPercentage = (totalSeaDistance / route.total_distance_km) * 100;
+    
+    if (seaPercentage > 90) {
+      suggestions.push(`Route is heavily sea-focused (${seaPercentage.toFixed(1)}%). Consider if land connections could offer benefits.`);
+    } else if (seaPercentage < 10) {
+      suggestions.push(`Route is heavily land-focused (${(100-seaPercentage).toFixed(1)}% land). Consider if sea transport could be more efficient.`);
+    }
+
+    return {
+      isValid: warnings.length === 0,
+      warnings,
+      suggestions
+    };
   }
 }
 

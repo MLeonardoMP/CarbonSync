@@ -54,7 +54,22 @@ const PlanEnhancedLogisticsJourneyOutputSchema = z.object({
     seaSegmentCount: z.number().describe('Number of sea segments'),
     landSegmentCount: z.number().describe('Number of land segments'),
     majorPorts: z.array(z.string()).describe('Major ports used in the route'),
-  }).describe('Analysis of the route composition'),
+    riskAssessment: z.object({
+      overall: z.enum(['low', 'medium', 'high']).describe('Overall route risk level'),
+      factors: z.array(z.string()).describe('Key risk factors identified'),
+      mitigations: z.array(z.string()).describe('Recommended risk mitigations')
+    }).describe('Risk assessment for the route'),
+    optimizations: z.object({
+      alternativeRoutes: z.array(z.string()).describe('Suggested alternative routes'),
+      timingRecommendations: z.array(z.string()).describe('Optimal timing suggestions'),
+      costSavingOpportunities: z.array(z.string()).describe('Potential cost savings')
+    }).describe('Route optimization suggestions'),
+    marketConditions: z.object({
+      fuelPrices: z.string().describe('Current fuel price trends'),
+      portCongestion: z.string().describe('Port congestion status'),
+      seasonalFactors: z.string().describe('Seasonal considerations')
+    }).describe('Current market and operational conditions')
+  }).describe('Enhanced analysis of the route composition with real-world intelligence'),
 });
 export type PlanEnhancedLogisticsJourneyOutput = z.infer<typeof PlanEnhancedLogisticsJourneyOutputSchema>;
 
@@ -78,10 +93,15 @@ export async function planEnhancedLogisticsJourney(
 
   const enhancedRoute = routeResult.route;
 
+  // Validate the route and identify potential issues
+  const validation = routeService.validateRoute(enhancedRoute);
+  
   // Use AI to enhance the route with emissions, cost, and time estimates
+  // Include validation results for better decision making
   const enhancedOutput = await planEnhancedLogisticsJourneyFlow({
     route: enhancedRoute,
-    cargoWeightTons: leg.cargoWeightTons
+    cargoWeightTons: leg.cargoWeightTons,
+    validation: validation
   });
 
   // Generate GeoJSON for the route
@@ -108,13 +128,20 @@ const enhancedPrompt = ai.definePrompt({
         total_waypoints: z.number(),
         route_description: z.string()
       }),
-      cargoWeightTons: z.number().optional()
+      cargoWeightTons: z.number().optional(),
+      routeResearch: z.string().optional().describe('Research data about the route conditions, ports, and logistics information')
     })
   },
   output: { schema: PlanEnhancedLogisticsJourneyOutputSchema },
-  prompt: `You are an expert logistics analyst specializing in segment-focused route planning and emissions calculation.
+  prompt: `You are an expert logistics analyst with access to real-time maritime and logistics intelligence, specializing in intelligent route optimization that considers both land-only and multimodal solutions.
 
-Given the following route with segments, calculate detailed emissions, costs, and time estimates for each segment and provide a comprehensive analysis.
+**IMPORTANT ROUTING PHILOSOPHY:**
+- The route calculation system now uses intelligent mode selection - it will AUTOMATICALLY choose land-only for domestic/short routes
+- For domestic routes (same country), the system defaults to single truck segments for optimal efficiency
+- Sea routes are only used when they provide clear advantages: crossing water bodies, or long international distances
+- When you see a single land segment, this represents an optimal direct truck route
+
+Given the following route with segments and research data, calculate detailed emissions, costs, and time estimates for each segment while validating the transport mode decisions.
 
 **Route Information:**
 - Description: {{route.route_description}}
@@ -127,29 +154,52 @@ Given the following route with segments, calculate detailed emissions, costs, an
 - Segment {{@index}}: {{type}} - {{description}} ({{distance_km}} km, {{waypoints.length}} waypoints)
 {{/each}}
 
-**Task Requirements:**
+{{#if routeResearch}}
+**Real-time Route Intelligence:**
+{{routeResearch}}
+{{/if}}
 
-1. **Emissions Calculation**: For each segment, calculate CO2e emissions based on:
-   - Sea segments: Use maritime shipping emission factors (~10-40g CO2e per ton-km depending on vessel type)
-   - Land segments: Use appropriate land transport (truck: ~60-150g CO2e per ton-km, rail: ~20-40g CO2e per ton-km)
-   - Consider cargo weight if provided, use average cargo weight if not specified
+**Enhanced Task Requirements:**
 
-2. **Time Estimation**: For each segment, estimate travel time based on:
-   - Sea segments: Average speed 15-25 knots
-   - Land segments: Average speed 60-80 km/h for trucks, 50-100 km/h for rail
+1. **Route Mode Validation & Optimization**: 
+   - VALIDATE that the chosen route type is optimal and efficient for the journey
+   - For single land segments: This represents an optimal direct truck route - calculate accordingly
+   - For multimodal routes: Validate that sea segments provide clear value (water crossing, long distance)
+   - Provide alternative recommendations if the route type could be improved
 
-3. **Cost Estimation**: For each segment, estimate costs based on:
-   - Sea segments: $50-200 per TEU per 1000km depending on route
-   - Land segments: $1-3 per km for trucking, $0.5-1.5 per km for rail
+2. **Intelligent Emissions Calculation**: For each segment, calculate CO2e emissions considering:
+   - **Land segments**: Truck transport efficiency in the region (~60-120g CO2e per ton-km depending on infrastructure)
+   - **Sea segments**: Maritime efficiency for justified routes (~10-40g CO2e per ton-km)
+   - Regional transport standards and fuel efficiency
+   - Real-world operational factors from research data
 
-4. **Route Analysis**: Provide analysis including:
-   - Total sea vs land distance breakdown
-   - Count of sea vs land segments
-   - Major ports identified in the route
+3. **Practical Time Estimation**: For each segment, estimate travel time considering:
+   - **Land segments**: Regional highway quality, traffic patterns, border procedures
+   - **Sea segments**: Port operations, weather, canal transit times (only when appropriate)
+   - Domestic vs international routing differences
+   - Infrastructure capabilities and limitations
 
-Use realistic industry standards and provide practical estimates. The route has been optimized for the most practical combination of sea and land transport.
+4. **Realistic Cost Estimation**: For each segment, estimate costs based on:
+   - Local and regional trucking rates
+   - Maritime rates (only when sea transport is justified)
+   - Fuel costs and regional variations
+   - Port fees and handling charges (when applicable)
+   - Border crossing and documentation costs
 
-Return the enhanced route with all calculated values and analysis.`,
+5. **Route Optimization Analysis**: Provide enhanced analysis including:
+   - Assessment of route efficiency and mode selection appropriateness
+   - Infrastructure and timing optimization suggestions
+   - Risk factors specific to the chosen transport modes
+   - Cost-benefit analysis of current route vs alternatives
+
+**SPECIFIC GUIDANCE FOR ROUTE TYPES:**
+- **Single land segment**: Optimal direct truck route - estimate accordingly with realistic highway speeds and costs
+- **Multimodal with sea segments**: Validate sea segments are justified by water crossings or significant distance/cost benefits
+- **Short domestic routes**: Should typically be single land segments with competitive truck rates
+
+Use the research data to provide realistic, current industry insights and make intelligent recommendations about transport mode selection. Prioritize practical, efficient, and cost-effective routing decisions.
+
+Return the enhanced route with all calculated values, mode optimization recommendations, and strategic analysis.`,
 });
 
 const planEnhancedLogisticsJourneyFlow = ai.defineFlow(
@@ -167,12 +217,57 @@ const planEnhancedLogisticsJourneyFlow = ai.defineFlow(
         total_waypoints: z.number(),
         route_description: z.string()
       }),
-      cargoWeightTons: z.number().optional()
+      cargoWeightTons: z.number().optional(),
+      validation: z.object({
+        isValid: z.boolean(),
+        warnings: z.array(z.string()),
+        suggestions: z.array(z.string())
+      }).optional()
     }),
     outputSchema: PlanEnhancedLogisticsJourneyOutputSchema,
   },
   async (input) => {
-    const { output } = await enhancedPrompt(input);
+    // First, research the route to gather real-time logistics intelligence using Gemini 2.0's web access
+    const routeResearch = await ai.generate({
+      prompt: `Please search the web for current information about the following logistics route and provide actionable intelligence:
+
+Route: ${input.route.route_description}
+Segments: ${input.route.segments.map((s, i) => `${i+1}. ${s.type} - ${s.description}`).join(', ')}
+
+${input.validation ? `
+Route Validation Issues:
+- Valid: ${input.validation.isValid}
+- Warnings: ${input.validation.warnings.join(', ')}
+- Suggestions: ${input.validation.suggestions.join(', ')}
+` : ''}
+
+Research Requirements:
+1. Current port conditions, congestion levels, and operational status for major ports in this route
+2. Seasonal weather patterns, current conditions, and optimal timing for this route
+3. Geopolitical considerations, safety concerns, and any route disruptions
+4. Infrastructure status, capacity limitations, and recent developments
+5. Current shipping rates, fuel costs, and market conditions affecting this route
+6. Alternative routes, optimization opportunities, or recommended changes
+7. Any recent incidents, closures, or significant changes affecting these segments
+
+Focus on practical, current information that would directly impact routing decisions, costs, timing, and safety. Look for recent news, port authorities' announcements, shipping industry reports, and weather forecasts.
+
+Provide a comprehensive summary of findings that will help optimize the route planning.`,
+      model: 'googleai/gemini-2.0-flash',
+      config: {
+        temperature: 0.3,
+      },
+    });
+
+    const researchData = routeResearch.text || '';
+
+    // Now enhance the route with this research data
+    const { output } = await enhancedPrompt({
+      route: input.route,
+      cargoWeightTons: input.cargoWeightTons,
+      routeResearch: researchData
+    });
+    
     return output!;
   }
 );

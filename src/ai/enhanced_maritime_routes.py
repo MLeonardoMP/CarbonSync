@@ -107,7 +107,418 @@ class PortFinder:
         "chennai": {"name": "Chennai", "lon": 80.3, "lat": 13.1, "country": "India"},
         "sydney": {"name": "Sydney", "lon": 151.2, "lat": -33.9, "country": "Australia"},
         "vancouver": {"name": "Vancouver", "lon": -123.1, "lat": 49.3, "country": "Canada"},
-        "santos": {"name": "Santos", "lon": -46.3, "lat": -23.9, "country": "Brazil"}
+        "santos": {"name": "Santos", "lon": -46.3, "lat": -23.9, "country": "Brazil"},
+        # Additional European ports
+        "le_havre": {"name": "Le Havre", "lon": 0.1, "lat": 49.5, "country": "France"},
+        "piraeus": {"name": "Piraeus", "lon": 23.6, "lat": 37.9, "country": "Greece"},
+        "genova": {"name": "Genova", "lon": 8.9, "lat": 44.4, "country": "Italy"},
+        "valencia": {"name": "Valencia", "lon": -0.4, "lat": 39.5, "country": "Spain"},
+        "felixstowe": {"name": "Felixstowe", "lon": 1.3, "lat": 51.9, "country": "UK"},
+        "bremerhaven": {"name": "Bremerhaven", "lon": 8.6, "lat": 53.5, "country": "Germany"},
+        # Additional Asian ports
+        "busan": {"name": "Busan", "lon": 129.0, "lat": 35.1, "country": "South Korea"},
+        "tokyo": {"name": "Tokyo", "lon": 139.7, "lat": 35.7, "country": "Japan"},
+        "kobe": {"name": "Kobe", "lon": 135.2, "lat": 34.7, "country": "Japan"},
+        "port_klang": {"name": "Port Klang", "lon": 101.4, "lat": 3.0, "country": "Malaysia"},
+        "tanjung_pelepas": {"name": "Tanjung Pelepas", "lon": 103.5, "lat": 1.4, "country": "Malaysia"},
+        "jakarta": {"name": "Jakarta", "lon": 106.8, "lat": -6.1, "country": "Indonesia"},
+        "colombo": {"name": "Colombo", "lon": 79.8, "lat": 6.9, "country": "Sri Lanka"},
+        "karachi": {"name": "Karachi", "lon": 67.0, "lat": 24.9, "country": "Pakistan"},
+        "haifa": {"name": "Haifa", "lon": 34.9, "lat": 32.8, "country": "Israel"},
+        "beirut": {"name": "Beirut", "lon": 35.5, "lat": 33.8, "country": "Lebanon"},
+        # Additional North American ports
+        "long_beach": {"name": "Long Beach", "lon": -118.2, "lat": 33.8, "country": "USA"},
+        "seattle": {"name": "Seattle", "lon": -122.3, "lat": 47.6, "country": "USA"},
+        "new_orleans": {"name": "New Orleans", "lon": -90.1, "lat": 29.9, "country": "USA"},
+        "charleston": {"name": "Charleston", "lon": -79.9, "lat": 32.8, "country": "USA"},
+        "savannah": {"name": "Savannah", "lon": -81.1, "lat": 32.1, "country": "USA"},
+        "miami": {"name": "Miami", "lon": -80.2, "lat": 25.8, "country": "USA"},
+        "montreal": {"name": "Montreal", "lon": -73.6, "lat": 45.5, "country": "Canada"},
+        # Additional South American ports
+        "valparaiso": {"name": "Valparaiso", "lon": -71.6, "lat": -33.0, "country": "Chile"},
+        "buenos_aires": {"name": "Buenos Aires", "lon": -58.7, "lat": -34.6, "country": "Argentina"},
+        "rio_de_janeiro": {"name": "Rio de Janeiro", "lon": -43.2, "lat": -22.9, "country": "Brazil"},
+        "guayaquil": {"name": "Guayaquil", "lon": -79.9, "lat": -2.2, "country": "Ecuador"},
+        "cartagena": {"name": "Cartagena", "lon": -75.5, "lat": 10.4, "country": "Colombia"},
+        "veracruz": {"name": "Veracruz", "lon": -96.1, "lat": 19.2, "country": "Mexico"},
+        "manzanillo": {"name": "Manzanillo", "lon": -104.3, "lat": 19.0, "country": "Mexico"},
+        # Additional African ports
+        "dar_es_salaam": {"name": "Dar es Salaam", "lon": 39.3, "lat": -6.8, "country": "Tanzania"},
+        "mombasa": {"name": "Mombasa", "lon": 39.7, "lat": -4.0, "country": "Kenya"},
+        "abidjan": {"name": "Abidjan", "lon": -4.0, "lat": 5.3, "country": "Ivory Coast"},
+        "tema": {"name": "Tema", "lon": 0.0, "lat": 5.6, "country": "Ghana"},
+        "lome": {"name": "Lome", "lon": 1.2, "lat": 6.1, "country": "Togo"},
+        "algiers": {"name": "Algiers", "lon": 3.0, "lat": 36.8, "country": "Algeria"},
+        "tunis": {"name": "Tunis", "lon": 10.2, "lat": 36.8, "country": "Tunisia"},
+        # Additional Oceania ports
+        "melbourne": {"name": "Melbourne", "lon": 144.9, "lat": -37.8, "country": "Australia"},
+        "brisbane": {"name": "Brisbane", "lon": 153.0, "lat": -27.5, "country": "Australia"},
+        "adelaide": {"name": "Adelaide", "lon": 138.6, "lat": -34.9, "country": "Australia"},
+        "auckland": {"name": "Auckland", "lon": 174.8, "lat": -36.8, "country": "New Zealand"},
+        "wellington": {"name": "Wellington", "lon": 174.8, "lat": -41.3, "country": "New Zealand"},
+        # Additional Middle Eastern ports
+        "jeddah": {"name": "Jeddah", "lon": 39.2, "lat": 21.5, "country": "Saudi Arabia"},
+        "dammam": {"name": "Dammam", "lon": 50.1, "lat": 26.4, "country": "Saudi Arabia"},
+        "doha": {"name": "Doha", "lon": 51.5, "lat": 25.3, "country": "Qatar"},
+        "kuwait_city": {"name": "Kuwait City", "lon": 47.9, "lat": 29.4, "country": "Kuwait"},
+        "bandar_abbas": {"name": "Bandar Abbas", "lon": 56.3, "lat": 27.2, "country": "Iran"},
+        "muscat": {"name": "Muscat", "lon": 58.4, "lat": 23.6, "country": "Oman"},
+        # Additional Baltic and Scandinavian ports
+        "helsinki": {"name": "Helsinki", "lon": 24.9, "lat": 60.2, "country": "Finland"},
+        "stockholm": {"name": "Stockholm", "lon": 18.1, "lat": 59.3, "country": "Sweden"},
+        "copenhagen": {"name": "Copenhagen", "lon": 12.6, "lat": 55.7, "country": "Denmark"},
+        "oslo": {"name": "Oslo", "lon": 10.7, "lat": 59.9, "country": "Norway"},
+        "riga": {"name": "Riga", "lon": 24.1, "lat": 56.9, "country": "Latvia"},
+        "tallinn": {"name": "Tallinn", "lon": 24.7, "lat": 59.4, "country": "Estonia"},
+        "st_petersburg": {"name": "St. Petersburg", "lon": 30.3, "lat": 59.9, "country": "Russia"},
+        # Caribbean and Central American ports
+        "san_juan": {"name": "San Juan", "lon": -66.1, "lat": 18.5, "country": "Puerto Rico"},
+        "kingston": {"name": "Kingston", "lon": -76.8, "lat": 18.0, "country": "Jamaica"},
+        "port_of_spain": {"name": "Port of Spain", "lon": -61.5, "lat": 10.7, "country": "Trinidad and Tobago"},
+        "panama_city": {"name": "Panama City", "lon": -79.5, "lat": 9.0, "country": "Panama"},
+        "colon": {"name": "Colon", "lon": -79.9, "lat": 9.4, "country": "Panama"},
+        "puerto_limon": {"name": "Puerto Limon", "lon": -83.0, "lat": 10.0, "country": "Costa Rica"},
+        # Additional major Chinese ports
+        "tianjin": {"name": "Tianjin", "lon": 117.2, "lat": 39.1, "country": "China"},
+        "qingdao": {"name": "Qingdao", "lon": 120.4, "lat": 36.1, "country": "China"},
+        "guangzhou": {"name": "Guangzhou", "lon": 113.3, "lat": 23.1, "country": "China"},
+        "shenzhen": {"name": "Shenzhen", "lon": 114.1, "lat": 22.5, "country": "China"},
+        "ningbo": {"name": "Ningbo", "lon": 121.5, "lat": 29.9, "country": "China"},
+        "dalian": {"name": "Dalian", "lon": 121.6, "lat": 38.9, "country": "China"},
+        "xiamen": {"name": "Xiamen", "lon": 118.1, "lat": 24.5, "country": "China"},
+        # Additional Indian Ocean ports
+        "visakhapatnam": {"name": "Visakhapatnam", "lon": 83.3, "lat": 17.7, "country": "India"},
+        "kandla": {"name": "Kandla", "lon": 70.2, "lat": 23.0, "country": "India"},
+        "cochin": {"name": "Cochin", "lon": 76.2, "lat": 10.0, "country": "India"},
+        "tuticorin": {"name": "Tuticorin", "lon": 78.1, "lat": 8.8, "country": "India"},
+        "paradip": {"name": "Paradip", "lon": 86.6, "lat": 20.3, "country": "India"},
+        "chittagong": {"name": "Chittagong", "lon": 91.8, "lat": 22.3, "country": "Bangladesh"},
+        "port_sudan": {"name": "Port Sudan", "lon": 37.2, "lat": 19.6, "country": "Sudan"},
+        "djibouti": {"name": "Djibouti", "lon": 43.1, "lat": 11.6, "country": "Djibouti"},
+        "aden": {"name": "Aden", "lon": 45.0, "lat": 12.8, "country": "Yemen"},
+        "sohar": {"name": "Sohar", "lon": 56.7, "lat": 24.4, "country": "Oman"},
+        # Additional Southeast Asian ports
+        "ho_chi_minh": {"name": "Ho Chi Minh City", "lon": 106.7, "lat": 10.8, "country": "Vietnam"},
+        "haiphong": {"name": "Haiphong", "lon": 106.7, "lat": 20.9, "country": "Vietnam"},
+        "manila": {"name": "Manila", "lon": 121.0, "lat": 14.6, "country": "Philippines"},
+        "cebu": {"name": "Cebu", "lon": 123.9, "lat": 10.3, "country": "Philippines"},
+        "bangkok": {"name": "Bangkok", "lon": 100.5, "lat": 13.8, "country": "Thailand"},
+        "laem_chabang": {"name": "Laem Chabang", "lon": 100.9, "lat": 13.1, "country": "Thailand"},
+        "yangon": {"name": "Yangon", "lon": 96.2, "lat": 16.8, "country": "Myanmar"},
+        "sihanoukville": {"name": "Sihanoukville", "lon": 103.5, "lat": 10.6, "country": "Cambodia"},
+        # Additional Russian and Arctic ports
+        "vladivostok": {"name": "Vladivostok", "lon": 131.9, "lat": 43.1, "country": "Russia"},
+        "novorossiysk": {"name": "Novorossiysk", "lon": 37.8, "lat": 44.7, "country": "Russia"},
+        "kaliningrad": {"name": "Kaliningrad", "lon": 20.5, "lat": 54.7, "country": "Russia"},
+        "arkhangelsk": {"name": "Arkhangelsk", "lon": 40.5, "lat": 64.5, "country": "Russia"},
+        "murmansk": {"name": "Murmansk", "lon": 33.1, "lat": 68.9, "country": "Russia"},
+        # Additional Mediterranean ports
+        "barcelona": {"name": "Barcelona", "lon": 2.2, "lat": 41.4, "country": "Spain"},
+        "marseille": {"name": "Marseille", "lon": 5.4, "lat": 43.3, "country": "France"},
+        "naples": {"name": "Naples", "lon": 14.3, "lat": 40.8, "country": "Italy"},
+        "venice": {"name": "Venice", "lon": 12.3, "lat": 45.4, "country": "Italy"},
+        "istanbul": {"name": "Istanbul", "lon": 29.0, "lat": 41.0, "country": "Turkey"},
+        "izmir": {"name": "Izmir", "lon": 27.1, "lat": 38.4, "country": "Turkey"},
+        "mersin": {"name": "Mersin", "lon": 34.6, "lat": 36.8, "country": "Turkey"},
+        "limassol": {"name": "Limassol", "lon": 33.0, "lat": 34.7, "country": "Cyprus"},
+        "malta": {"name": "Malta", "lon": 14.5, "lat": 35.9, "country": "Malta"},
+        "palermo": {"name": "Palermo", "lon": 13.4, "lat": 38.1, "country": "Italy"},
+        # Additional North African ports
+        "rabat": {"name": "Rabat", "lon": -6.8, "lat": 34.0, "country": "Morocco"},
+        "tangier": {"name": "Tangier", "lon": -5.8, "lat": 35.8, "country": "Morocco"},
+        "oran": {"name": "Oran", "lon": -0.6, "lat": 35.7, "country": "Algeria"},
+        "sfax": {"name": "Sfax", "lon": 10.8, "lat": 34.7, "country": "Tunisia"},
+        "benghazi": {"name": "Benghazi", "lon": 20.1, "lat": 32.1, "country": "Libya"},
+        "tripoli": {"name": "Tripoli", "lon": 13.2, "lat": 32.9, "country": "Libya"},
+        # Additional West African ports
+        "freetown": {"name": "Freetown", "lon": -13.2, "lat": 8.5, "country": "Sierra Leone"},
+        "conakry": {"name": "Conakry", "lon": -13.7, "lat": 9.5, "country": "Guinea"},
+        "bissau": {"name": "Bissau", "lon": -15.6, "lat": 11.9, "country": "Guinea-Bissau"},
+        "banjul": {"name": "Banjul", "lon": -16.6, "lat": 13.5, "country": "Gambia"},
+        "nouakchott": {"name": "Nouakchott", "lon": -15.9, "lat": 18.1, "country": "Mauritania"},
+        "cotonou": {"name": "Cotonou", "lon": 2.4, "lat": 6.4, "country": "Benin"},
+        "porto_novo": {"name": "Porto Novo", "lon": 2.6, "lat": 6.5, "country": "Benin"},
+        "libreville": {"name": "Libreville", "lon": 9.5, "lat": 0.4, "country": "Gabon"},
+        "douala": {"name": "Douala", "lon": 9.7, "lat": 4.0, "country": "Cameroon"},
+        "malabo": {"name": "Malabo", "lon": 8.8, "lat": 3.8, "country": "Equatorial Guinea"},
+        # Additional East African ports
+        "port_said": {"name": "Port Said", "lon": 32.3, "lat": 31.3, "country": "Egypt"},
+        "suez": {"name": "Suez", "lon": 32.5, "lat": 29.9, "country": "Egypt"},
+        "massawa": {"name": "Massawa", "lon": 39.5, "lat": 15.6, "country": "Eritrea"},
+        "berbera": {"name": "Berbera", "lon": 45.0, "lat": 10.4, "country": "Somalia"},
+        "mogadishu": {"name": "Mogadishu", "lon": 45.3, "lat": 2.0, "country": "Somalia"},
+        "kilifi": {"name": "Kilifi", "lon": 39.8, "lat": -3.6, "country": "Kenya"},
+        "tanga": {"name": "Tanga", "lon": 39.1, "lat": -5.1, "country": "Tanzania"},
+        "zanzibar": {"name": "Zanzibar", "lon": 39.2, "lat": -6.2, "country": "Tanzania"},
+        "nacala": {"name": "Nacala", "lon": 40.7, "lat": -14.5, "country": "Mozambique"},
+        "maputo": {"name": "Maputo", "lon": 32.6, "lat": -25.9, "country": "Mozambique"},
+        "beira": {"name": "Beira", "lon": 34.8, "lat": -19.8, "country": "Mozambique"},
+        "antsiranana": {"name": "Antsiranana", "lon": 49.3, "lat": -12.3, "country": "Madagascar"},
+        "toamasina": {"name": "Toamasina", "lon": 49.4, "lat": -18.2, "country": "Madagascar"},
+        "port_louis": {"name": "Port Louis", "lon": 57.5, "lat": -20.2, "country": "Mauritius"},
+        "victoria": {"name": "Victoria", "lon": 55.5, "lat": -4.6, "country": "Seychelles"},
+        # Additional Southern African ports
+        "luanda": {"name": "Luanda", "lon": 13.2, "lat": -8.8, "country": "Angola"},
+        "lobito": {"name": "Lobito", "lon": 13.5, "lat": -12.4, "country": "Angola"},
+        "walvis_bay": {"name": "Walvis Bay", "lon": 14.5, "lat": -22.9, "country": "Namibia"},
+        "port_elizabeth": {"name": "Port Elizabeth", "lon": 25.6, "lat": -33.9, "country": "South Africa"},
+        "east_london": {"name": "East London", "lon": 27.9, "lat": -33.0, "country": "South Africa"},
+        "richards_bay": {"name": "Richards Bay", "lon": 32.0, "lat": -28.8, "country": "South Africa"},
+        "mossel_bay": {"name": "Mossel Bay", "lon": 22.1, "lat": -34.2, "country": "South Africa"},
+        # Additional Pacific Island ports
+        "suva": {"name": "Suva", "lon": 178.4, "lat": -18.1, "country": "Fiji"},
+        "lautoka": {"name": "Lautoka", "lon": 177.5, "lat": -17.6, "country": "Fiji"},
+        "noumea": {"name": "Noumea", "lon": 166.4, "lat": -22.3, "country": "New Caledonia"},
+        "papeete": {"name": "Papeete", "lon": -149.6, "lat": -17.5, "country": "French Polynesia"},
+        "port_vila": {"name": "Port Vila", "lon": 168.3, "lat": -17.7, "country": "Vanuatu"},
+        "nuku_alofa": {"name": "Nuku'alofa", "lon": -175.2, "lat": -21.1, "country": "Tonga"},
+        "apia": {"name": "Apia", "lon": -171.8, "lat": -13.8, "country": "Samoa"},
+        "port_moresby": {"name": "Port Moresby", "lon": 147.2, "lat": -9.4, "country": "Papua New Guinea"},
+        "honiara": {"name": "Honiara", "lon": 159.9, "lat": -9.4, "country": "Solomon Islands"},
+        # Additional Canadian ports
+        "halifax": {"name": "Halifax", "lon": -63.6, "lat": 44.6, "country": "Canada"},
+        "saint_john": {"name": "Saint John", "lon": -66.1, "lat": 45.3, "country": "Canada"},
+        "thunder_bay": {"name": "Thunder Bay", "lon": -89.2, "lat": 48.4, "country": "Canada"},
+        "prince_rupert": {"name": "Prince Rupert", "lon": -130.3, "lat": 54.3, "country": "Canada"},
+        "churchill": {"name": "Churchill", "lon": -94.2, "lat": 58.8, "country": "Canada"},
+        # Additional Central and South American ports
+        "acapulco": {"name": "Acapulco", "lon": -99.9, "lat": 16.9, "country": "Mexico"},
+        "puerto_vallarta": {"name": "Puerto Vallarta", "lon": -105.2, "lat": 20.6, "country": "Mexico"},
+        "salina_cruz": {"name": "Salina Cruz", "lon": -95.2, "lat": 16.2, "country": "Mexico"},
+        "progreso": {"name": "Progreso", "lon": -89.7, "lat": 21.3, "country": "Mexico"},
+        "puerto_cortes": {"name": "Puerto Cortes", "lon": -87.9, "lat": 15.8, "country": "Honduras"},
+        "acajutla": {"name": "Acajutla", "lon": -89.8, "lat": 13.6, "country": "El Salvador"},
+        "puerto_quetzal": {"name": "Puerto Quetzal", "lon": -90.8, "lat": 13.9, "country": "Guatemala"},
+        "puerto_barrios": {"name": "Puerto Barrios", "lon": -88.6, "lat": 15.7, "country": "Guatemala"},
+        "bluefields": {"name": "Bluefields", "lon": -83.8, "lat": 12.0, "country": "Nicaragua"},
+        "la_ceiba": {"name": "La Ceiba", "lon": -86.8, "lat": 15.8, "country": "Honduras"},
+        "bridgetown": {"name": "Bridgetown", "lon": -59.6, "lat": 13.1, "country": "Barbados"},
+        "st_johns": {"name": "St. John's", "lon": -61.9, "lat": 17.1, "country": "Antigua and Barbuda"},
+        "castries": {"name": "Castries", "lon": -61.0, "lat": 14.0, "country": "Saint Lucia"},
+        "roseau": {"name": "Roseau", "lon": -61.4, "lat": 15.3, "country": "Dominica"},
+        "st_georges": {"name": "St. George's", "lon": -61.8, "lat": 12.1, "country": "Grenada"},
+        "paramaribo": {"name": "Paramaribo", "lon": -55.2, "lat": 5.9, "country": "Suriname"},
+        "cayenne": {"name": "Cayenne", "lon": -52.3, "lat": 4.9, "country": "French Guiana"},
+        "georgetown_guyana": {"name": "Georgetown", "lon": -58.2, "lat": 6.8, "country": "Guyana"},
+        "fortaleza": {"name": "Fortaleza", "lon": -38.5, "lat": -3.7, "country": "Brazil"},
+        "recife": {"name": "Recife", "lon": -34.9, "lat": -8.1, "country": "Brazil"},
+        "salvador": {"name": "Salvador", "lon": -38.5, "lat": -12.9, "country": "Brazil"},
+        "vitoria": {"name": "Vitoria", "lon": -40.3, "lat": -20.3, "country": "Brazil"},
+        "paranagua": {"name": "Paranagua", "lon": -48.5, "lat": -25.5, "country": "Brazil"},
+        "itajai": {"name": "Itajai", "lon": -48.7, "lat": -26.9, "country": "Brazil"},
+        "rio_grande": {"name": "Rio Grande", "lon": -52.1, "lat": -32.0, "country": "Brazil"},
+        "montevideo": {"name": "Montevideo", "lon": -56.2, "lat": -34.9, "country": "Uruguay"},
+        "la_plata": {"name": "La Plata", "lon": -57.9, "lat": -34.9, "country": "Argentina"},
+        "bahia_blanca": {"name": "Bahia Blanca", "lon": -62.3, "lat": -38.7, "country": "Argentina"},
+        "puerto_madryn": {"name": "Puerto Madryn", "lon": -65.0, "lat": -42.8, "country": "Argentina"},
+        "ushuaia": {"name": "Ushuaia", "lon": -68.3, "lat": -54.8, "country": "Argentina"},
+        "antofagasta": {"name": "Antofagasta", "lon": -70.4, "lat": -23.6, "country": "Chile"},
+        "iquique": {"name": "Iquique", "lon": -70.1, "lat": -20.2, "country": "Chile"},
+        "arica": {"name": "Arica", "lon": -70.3, "lat": -18.5, "country": "Chile"},
+        "talcahuano": {"name": "Talcahuano", "lon": -73.1, "lat": -36.7, "country": "Chile"},
+        "puerto_montt": {"name": "Puerto Montt", "lon": -72.9, "lat": -41.5, "country": "Chile"},
+        "punta_arenas": {"name": "Punta Arenas", "lon": -70.9, "lat": -53.1, "country": "Chile"},
+        "esmeraldas": {"name": "Esmeraldas", "lon": -79.7, "lat": 1.0, "country": "Ecuador"},
+        "manta": {"name": "Manta", "lon": -80.7, "lat": -0.9, "country": "Ecuador"},
+        "salaverry": {"name": "Salaverry", "lon": -78.9, "lat": -8.2, "country": "Peru"},
+        "paita": {"name": "Paita", "lon": -81.1, "lat": -5.1, "country": "Peru"},
+        "ilo": {"name": "Ilo", "lon": -71.3, "lat": -17.6, "country": "Peru"},
+        "santa_marta": {"name": "Santa Marta", "lon": -74.2, "lat": 11.2, "country": "Colombia"},
+        "barranquilla": {"name": "Barranquilla", "lon": -74.8, "lat": 11.0, "country": "Colombia"},
+        "puerto_cabello": {"name": "Puerto Cabello", "lon": -68.0, "lat": 10.5, "country": "Venezuela"},
+        "maracaibo": {"name": "Maracaibo", "lon": -71.6, "lat": 10.7, "country": "Venezuela"},
+        "la_guaira": {"name": "La Guaira", "lon": -66.9, "lat": 10.6, "country": "Venezuela"},
+        # Major river-accessible ports (connected to sea via rivers)
+        "toronto": {"name": "Toronto", "lon": -79.4, "lat": 43.7, "country": "Canada"},
+        "quebec_city": {"name": "Quebec City", "lon": -71.2, "lat": 46.8, "country": "Canada"},
+        "detroit": {"name": "Detroit", "lon": -83.0, "lat": 42.3, "country": "USA"},
+        "cleveland": {"name": "Cleveland", "lon": -81.7, "lat": 41.5, "country": "USA"},
+        "buffalo": {"name": "Buffalo", "lon": -78.9, "lat": 42.9, "country": "USA"},
+        "milwaukee": {"name": "Milwaukee", "lon": -87.9, "lat": 43.0, "country": "USA"},
+        "chicago": {"name": "Chicago", "lon": -87.6, "lat": 41.9, "country": "USA"},
+        "duluth": {"name": "Duluth", "lon": -92.1, "lat": 46.8, "country": "USA"},
+        "baton_rouge": {"name": "Baton Rouge", "lon": -91.2, "lat": 30.4, "country": "USA"},
+        "memphis": {"name": "Memphis", "lon": -90.0, "lat": 35.1, "country": "USA"},
+        "st_louis": {"name": "St. Louis", "lon": -90.2, "lat": 38.6, "country": "USA"},
+        "pittsburgh": {"name": "Pittsburgh", "lon": -80.0, "lat": 40.4, "country": "USA"},
+        "cincinnati": {"name": "Cincinnati", "lon": -84.5, "lat": 39.1, "country": "USA"},
+        "louisville": {"name": "Louisville", "lon": -85.8, "lat": 38.3, "country": "USA"},
+        "huntington": {"name": "Huntington", "lon": -82.4, "lat": 38.4, "country": "USA"},
+        "evansville": {"name": "Evansville", "lon": -87.6, "lat": 37.9, "country": "USA"},
+        "paducah": {"name": "Paducah", "lon": -88.6, "lat": 37.1, "country": "USA"},
+        "cairo": {"name": "Cairo", "lon": -89.2, "lat": 37.0, "country": "USA"},
+        "minneapolis": {"name": "Minneapolis", "lon": -93.3, "lat": 44.9, "country": "USA"},
+        "st_paul": {"name": "St. Paul", "lon": -93.1, "lat": 44.9, "country": "USA"},
+        "davenport": {"name": "Davenport", "lon": -90.6, "lat": 41.5, "country": "USA"},
+        "dubuque": {"name": "Dubuque", "lon": -90.7, "lat": 42.5, "country": "USA"},
+        "prairie_du_chien": {"name": "Prairie du Chien", "lon": -91.1, "lat": 43.1, "country": "USA"},
+        "la_crosse": {"name": "La Crosse", "lon": -91.2, "lat": 43.8, "country": "USA"},
+        "winona": {"name": "Winona", "lon": -91.6, "lat": 44.0, "country": "USA"},
+        "clinton": {"name": "Clinton", "lon": -90.2, "lat": 41.8, "country": "USA"},
+        "muscatine": {"name": "Muscatine", "lon": -91.0, "lat": 41.4, "country": "USA"},
+        "keokuk": {"name": "Keokuk", "lon": -91.4, "lat": 40.4, "country": "USA"},
+        "hannibal": {"name": "Hannibal", "lon": -91.4, "lat": 39.7, "country": "USA"},
+        "natchez": {"name": "Natchez", "lon": -91.4, "lat": 31.6, "country": "USA"},
+        "vicksburg": {"name": "Vicksburg", "lon": -90.9, "lat": 32.4, "country": "USA"},
+        "greenville": {"name": "Greenville", "lon": -91.1, "lat": 33.4, "country": "USA"},
+        "helena": {"name": "Helena", "lon": -90.6, "lat": 34.5, "country": "USA"},
+        "cape_girardeau": {"name": "Cape Girardeau", "lon": -89.5, "lat": 37.3, "country": "USA"},
+        "quincy": {"name": "Quincy", "lon": -91.4, "lat": 39.9, "country": "USA"},
+        "burlington": {"name": "Burlington", "lon": -91.1, "lat": 40.8, "country": "USA"},
+        "fort_madison": {"name": "Fort Madison", "lon": -91.3, "lat": 40.6, "country": "USA"},
+        "rock_island": {"name": "Rock Island", "lon": -90.6, "lat": 41.5, "country": "USA"},
+        "moline": {"name": "Moline", "lon": -90.5, "lat": 41.5, "country": "USA"},
+        # Major European river ports
+        "bremen": {"name": "Bremen", "lon": 8.8, "lat": 53.1, "country": "Germany"},
+        "cologne": {"name": "Cologne", "lon": 6.9, "lat": 50.9, "country": "Germany"},
+        "dusseldorf": {"name": "Dusseldorf", "lon": 6.8, "lat": 51.2, "country": "Germany"},
+        "duisburg": {"name": "Duisburg", "lon": 6.8, "lat": 51.4, "country": "Germany"},
+        "mainz": {"name": "Mainz", "lon": 8.3, "lat": 50.0, "country": "Germany"},
+        "mannheim": {"name": "Mannheim", "lon": 8.5, "lat": 49.5, "country": "Germany"},
+        "ludwigshafen": {"name": "Ludwigshafen", "lon": 8.4, "lat": 49.5, "country": "Germany"},
+        "frankfurt": {"name": "Frankfurt", "lon": 8.7, "lat": 50.1, "country": "Germany"},
+        "karlsruhe": {"name": "Karlsruhe", "lon": 8.4, "lat": 49.0, "country": "Germany"},
+        "strasbourg": {"name": "Strasbourg", "lon": 7.7, "lat": 48.6, "country": "France"},
+        "basel": {"name": "Basel", "lon": 7.6, "lat": 47.6, "country": "Switzerland"},
+        "mulhouse": {"name": "Mulhouse", "lon": 7.3, "lat": 47.7, "country": "France"},
+        "amsterdam": {"name": "Amsterdam", "lon": 4.9, "lat": 52.4, "country": "Netherlands"},
+        "utrecht": {"name": "Utrecht", "lon": 5.1, "lat": 52.1, "country": "Netherlands"},
+        "arnhem": {"name": "Arnhem", "lon": 5.9, "lat": 52.0, "country": "Netherlands"},
+        "nijmegen": {"name": "Nijmegen", "lon": 5.9, "lat": 51.8, "country": "Netherlands"},
+        "emmerich": {"name": "Emmerich", "lon": 6.2, "lat": 51.8, "country": "Germany"},
+        "wesel": {"name": "Wesel", "lon": 6.6, "lat": 51.7, "country": "Germany"},
+        "rees": {"name": "Rees", "lon": 6.4, "lat": 51.8, "country": "Germany"},
+        "xanten": {"name": "Xanten", "lon": 6.5, "lat": 51.7, "country": "Germany"},
+        "kleve": {"name": "Kleve", "lon": 6.1, "lat": 51.8, "country": "Germany"},
+        "liege": {"name": "Liege", "lon": 5.6, "lat": 50.6, "country": "Belgium"},
+        "maastricht": {"name": "Maastricht", "lon": 5.7, "lat": 50.8, "country": "Netherlands"},
+        "rouen": {"name": "Rouen", "lon": 1.1, "lat": 49.4, "country": "France"},
+        "paris": {"name": "Paris", "lon": 2.3, "lat": 48.9, "country": "France"},
+        "brussels": {"name": "Brussels", "lon": 4.4, "lat": 50.8, "country": "Belgium"},
+        "ghent": {"name": "Ghent", "lon": 3.7, "lat": 51.1, "country": "Belgium"},
+        "bruges": {"name": "Bruges", "lon": 3.2, "lat": 51.2, "country": "Belgium"},
+        "ostend": {"name": "Ostend", "lon": 2.9, "lat": 51.2, "country": "Belgium"},
+        "zeebrugge": {"name": "Zeebrugge", "lon": 3.2, "lat": 51.3, "country": "Belgium"},
+        "terneuzen": {"name": "Terneuzen", "lon": 3.8, "lat": 51.3, "country": "Netherlands"},
+        "vlissingen": {"name": "Vlissingen", "lon": 3.6, "lat": 51.4, "country": "Netherlands"},
+        # Major Asian river ports
+        "nanjing": {"name": "Nanjing", "lon": 118.8, "lat": 32.1, "country": "China"},
+        "wuhan": {"name": "Wuhan", "lon": 114.3, "lat": 30.6, "country": "China"},
+        "chongqing": {"name": "Chongqing", "lon": 106.5, "lat": 29.6, "country": "China"},
+        "yichang": {"name": "Yichang", "lon": 111.3, "lat": 30.7, "country": "China"},
+        "jiujiang": {"name": "Jiujiang", "lon": 115.9, "lat": 29.7, "country": "China"},
+        "anqing": {"name": "Anqing", "lon": 117.0, "lat": 30.5, "country": "China"},
+        "wuhu": {"name": "Wuhu", "lon": 118.4, "lat": 31.3, "country": "China"},
+        "maanshan": {"name": "Maanshan", "lon": 118.5, "lat": 31.7, "country": "China"},
+        "tongling": {"name": "Tongling", "lon": 117.8, "lat": 30.9, "country": "China"},
+        "chizhou": {"name": "Chizhou", "lon": 117.5, "lat": 30.7, "country": "China"},
+        "huangshi": {"name": "Huangshi", "lon": 115.0, "lat": 30.2, "country": "China"},
+        "ezhou": {"name": "Ezhou", "lon": 114.9, "lat": 30.4, "country": "China"},
+        "huanggang": {"name": "Huanggang", "lon": 114.9, "lat": 30.4, "country": "China"},
+        "jingzhou": {"name": "Jingzhou", "lon": 112.2, "lat": 30.4, "country": "China"},
+        "yueyang": {"name": "Yueyang", "lon": 113.1, "lat": 29.4, "country": "China"},
+        "changsha": {"name": "Changsha", "lon": 112.9, "lat": 28.2, "country": "China"},
+        # Major South American river ports
+        "manaus": {"name": "Manaus", "lon": -60.0, "lat": -3.1, "country": "Brazil"},
+        "santarem": {"name": "Santarem", "lon": -54.7, "lat": -2.4, "country": "Brazil"},
+        "belem": {"name": "Belem", "lon": -48.5, "lat": -1.5, "country": "Brazil"},
+        "macapa": {"name": "Macapa", "lon": -51.1, "lat": 0.0, "country": "Brazil"},
+        "porto_velho": {"name": "Porto Velho", "lon": -63.9, "lat": -8.8, "country": "Brazil"},
+        "iquitos": {"name": "Iquitos", "lon": -73.2, "lat": -3.7, "country": "Peru"},
+        "leticia": {"name": "Leticia", "lon": -69.9, "lat": -4.2, "country": "Colombia"},
+        "tabatinga": {"name": "Tabatinga", "lon": -69.9, "lat": -4.3, "country": "Brazil"},
+        "tefe": {"name": "Tefe", "lon": -64.7, "lat": -3.4, "country": "Brazil"},
+        "coari": {"name": "Coari", "lon": -63.1, "lat": -4.1, "country": "Brazil"},
+        "itacoatiara": {"name": "Itacoatiara", "lon": -58.4, "lat": -3.1, "country": "Brazil"},
+        "parintins": {"name": "Parintins", "lon": -56.7, "lat": -2.6, "country": "Brazil"},
+        "obidos": {"name": "Obidos", "lon": -55.5, "lat": -1.9, "country": "Brazil"},
+        "almeirim": {"name": "Almeirim", "lon": -52.6, "lat": -1.5, "country": "Brazil"},
+        "monte_alegre": {"name": "Monte Alegre", "lon": -54.1, "lat": -2.0, "country": "Brazil"},
+        "prainha": {"name": "Prainha", "lon": -53.5, "lat": -1.8, "country": "Brazil"},
+        "gurupa": {"name": "Gurupa", "lon": -51.6, "lat": -1.4, "country": "Brazil"},
+        "breves": {"name": "Breves", "lon": -50.5, "lat": -1.7, "country": "Brazil"},
+        "abaetetuba": {"name": "Abaetetuba", "lon": -48.9, "lat": -1.7, "country": "Brazil"},
+        "barcarena": {"name": "Barcarena", "lon": -48.6, "lat": -1.6, "country": "Brazil"},
+        "tucurui": {"name": "Tucurui", "lon": -49.7, "lat": -3.8, "country": "Brazil"},
+        "altamira": {"name": "Altamira", "lon": -52.2, "lat": -3.2, "country": "Brazil"},
+        "itaituba": {"name": "Itaituba", "lon": -56.0, "lat": -4.3, "country": "Brazil"},
+        # African river ports
+        "aswan": {"name": "Aswan", "lon": 32.9, "lat": 24.1, "country": "Egypt"},
+        "luxor": {"name": "Luxor", "lon": 32.6, "lat": 25.7, "country": "Egypt"},
+        "cairo_port": {"name": "Cairo Port", "lon": 31.2, "lat": 30.1, "country": "Egypt"},
+        "khartoum": {"name": "Khartoum", "lon": 32.5, "lat": 15.5, "country": "Sudan"},
+        "juba": {"name": "Juba", "lon": 31.6, "lat": 4.9, "country": "South Sudan"},
+        "malakal": {"name": "Malakal", "lon": 31.7, "lat": 9.5, "country": "South Sudan"},
+        "renk": {"name": "Renk", "lon": 32.8, "lat": 11.8, "country": "South Sudan"},
+        "kodok": {"name": "Kodok", "lon": 32.1, "lat": 9.9, "country": "South Sudan"},
+        "bor": {"name": "Bor", "lon": 31.6, "lat": 6.2, "country": "South Sudan"},
+        "mongalla": {"name": "Mongalla", "lon": 31.8, "lat": 5.2, "country": "South Sudan"},
+        "kisangani": {"name": "Kisangani", "lon": 25.2, "lat": 0.5, "country": "Democratic Republic of Congo"},
+        "kinshasa": {"name": "Kinshasa", "lon": 15.3, "lat": -4.3, "country": "Democratic Republic of Congo"},
+        "brazzaville": {"name": "Brazzaville", "lon": 15.3, "lat": -4.3, "country": "Republic of Congo"},
+        "bangui": {"name": "Bangui", "lon": 18.6, "lat": 4.4, "country": "Central African Republic"},
+        "bamako": {"name": "Bamako", "lon": -8.0, "lat": 12.6, "country": "Mali"},
+        "gao": {"name": "Gao", "lon": -0.0, "lat": 16.3, "country": "Mali"},
+        "timbuktu": {"name": "Timbuktu", "lon": -3.0, "lat": 16.8, "country": "Mali"},
+        "mopti": {"name": "Mopti", "lon": -4.2, "lat": 14.5, "country": "Mali"},
+        "segou": {"name": "Segou", "lon": -6.3, "lat": 13.4, "country": "Mali"},
+        "kayes": {"name": "Kayes", "lon": -11.4, "lat": 14.4, "country": "Mali"},
+        "niamey": {"name": "Niamey", "lon": 2.1, "lat": 13.5, "country": "Niger"},
+        "tillaberi": {"name": "Tillaberi", "lon": 1.5, "lat": 14.2, "country": "Niger"},
+        "ayorou": {"name": "Ayorou", "lon": 0.9, "lat": 14.7, "country": "Niger"},
+        "ansongo": {"name": "Ansongo", "lon": 0.5, "lat": 15.7, "country": "Mali"},
+        "dire": {"name": "Dire", "lon": -3.4, "lat": 16.3, "country": "Mali"},
+        "tonka": {"name": "Tonka", "lon": -3.1, "lat": 16.1, "country": "Mali"},
+        "goundam": {"name": "Goundam", "lon": -3.7, "lat": 16.4, "country": "Mali"},
+        "rharous": {"name": "Rharous", "lon": -2.0, "lat": 16.9, "country": "Mali"},
+        "bourem": {"name": "Bourem", "lon": -0.4, "lat": 16.9, "country": "Mali"},
+        "ansongo": {"name": "Ansongo", "lon": 0.5, "lat": 15.7, "country": "Mali"},
+        # Russian river ports
+        "moscow": {"name": "Moscow", "lon": 37.6, "lat": 55.8, "country": "Russia"},
+        "nizhny_novgorod": {"name": "Nizhny Novgorod", "lon": 44.0, "lat": 56.3, "country": "Russia"},
+        "kazan": {"name": "Kazan", "lon": 49.1, "lat": 55.8, "country": "Russia"},
+        "samara": {"name": "Samara", "lon": 50.1, "lat": 53.2, "country": "Russia"},
+        "saratov": {"name": "Saratov", "lon": 46.0, "lat": 51.5, "country": "Russia"},
+        "volgograd": {"name": "Volgograd", "lon": 44.5, "lat": 48.7, "country": "Russia"},
+        "astrakhan": {"name": "Astrakhan", "lon": 48.0, "lat": 46.3, "country": "Russia"},
+        "ulyanovsk": {"name": "Ulyanovsk", "lon": 48.4, "lat": 54.3, "country": "Russia"},
+        "cheboksary": {"name": "Cheboksary", "lon": 47.2, "lat": 56.1, "country": "Russia"},
+        "yaroslavl": {"name": "Yaroslavl", "lon": 39.9, "lat": 57.6, "country": "Russia"},
+        "kostroma": {"name": "Kostroma", "lon": 40.9, "lat": 57.8, "country": "Russia"},
+        "tver": {"name": "Tver", "lon": 35.9, "lat": 56.9, "country": "Russia"},
+        "ryazan": {"name": "Ryazan", "lon": 39.7, "lat": 54.6, "country": "Russia"},
+        "rostov_on_don": {"name": "Rostov-on-Don", "lon": 39.7, "lat": 47.2, "country": "Russia"},
+        "krasnoyarsk": {"name": "Krasnoyarsk", "lon": 92.9, "lat": 56.0, "country": "Russia"},
+        "irkutsk": {"name": "Irkutsk", "lon": 104.3, "lat": 52.3, "country": "Russia"},
+        "khabarovsk": {"name": "Khabarovsk", "lon": 135.1, "lat": 48.5, "country": "Russia"},
+        "komsomolsk_on_amur": {"name": "Komsomolsk-on-Amur", "lon": 137.0, "lat": 50.6, "country": "Russia"},
+        "blagoveshchensk": {"name": "Blagoveshchensk", "lon": 127.5, "lat": 50.3, "country": "Russia"},
+        "nikolayevsk_on_amur": {"name": "Nikolayevsk-on-Amur", "lon": 140.7, "lat": 53.1, "country": "Russia"},
+        # Indian subcontinent river ports
+        "kolkata": {"name": "Kolkata", "lon": 88.4, "lat": 22.6, "country": "India"},
+        "haldia": {"name": "Haldia", "lon": 88.1, "lat": 22.1, "country": "India"},
+        "karimganj": {"name": "Karimganj", "lon": 92.4, "lat": 24.9, "country": "India"},
+        "pandu": {"name": "Pandu", "lon": 91.7, "lat": 26.1, "country": "India"},
+        "dhubri": {"name": "Dhubri", "lon": 89.9, "lat": 26.0, "country": "India"},
+        "jogighopa": {"name": "Jogighopa", "lon": 90.6, "lat": 26.4, "country": "India"},
+        "guwahati": {"name": "Guwahati", "lon": 91.7, "lat": 26.1, "country": "India"},
+        "silghat": {"name": "Silghat", "lon": 92.9, "lat": 26.8, "country": "India"},
+        "neamatighat": {"name": "Neamatighat", "lon": 94.2, "lat": 27.2, "country": "India"},
+        "dibrugarh": {"name": "Dibrugarh", "lon": 95.0, "lat": 27.5, "country": "India"},
+        "sadiya": {"name": "Sadiya", "lon": 95.7, "lat": 27.8, "country": "India"},
+        "varanasi": {"name": "Varanasi", "lon": 83.0, "lat": 25.3, "country": "India"},
+        "allahabad": {"name": "Allahabad", "lon": 81.8, "lat": 25.4, "country": "India"},
+        "patna": {"name": "Patna", "lon": 85.1, "lat": 25.6, "country": "India"},
+        "bhagalpur": {"name": "Bhagalpur", "lon": 87.0, "lat": 25.2, "country": "India"},
+        "farakka": {"name": "Farakka", "lon": 87.9, "lat": 24.8, "country": "India"},
+        "sahibganj": {"name": "Sahibganj", "lon": 87.6, "lat": 25.2, "country": "India"},
+        "rajmahal": {"name": "Rajmahal", "lon": 87.8, "lat": 25.0, "country": "India"},
+        "sultanganj": {"name": "Sultanganj", "lon": 86.7, "lat": 25.2, "country": "India"},
+        "munger": {"name": "Munger", "lon": 86.5, "lat": 25.4, "country": "India"},
+        "buxar": {"name": "Buxar", "lon": 83.9, "lat": 25.6, "country": "India"},
+        "ghazipur": {"name": "Ghazipur", "lon": 83.6, "lat": 25.6, "country": "India"},
+        "mirzapur": {"name": "Mirzapur", "lon": 82.6, "lat": 25.1, "country": "India"},
+        "chunar": {"name": "Chunar", "lon": 82.9, "lat": 25.1, "country": "India"}
     }
     
     @staticmethod
@@ -295,48 +706,58 @@ def get_maritime_route(from_lon: float, from_lat: float, to_lon: float, to_lat: 
 class EnhancedRouteCalculator:
     """Enhanced route calculator with segment-focused optimization"""
     
-    def __init__(self):
+    def __init__(self, debug=False):
         self.coordinate_extractor = CoordinateExtractor()
         self.port_finder = PortFinder()
+        self.debug = debug
+    
+    def _debug_print(self, message):
+        """Print debug message only when debug mode is enabled"""
+        if self.debug:
+            print(message, file=sys.stderr)  # Use stderr for debug output
     
     def calculate_enhanced_route(self, origin_name: str, destination_name: str) -> Optional[EnhancedRoute]:
         """
-        Calculate an enhanced route with proper segmentation
+        Calculate an enhanced route with smart mode selection based on practicality
         """
         # Step 1: Extract coordinates for origin and destination
         origin_coord = self.coordinate_extractor.get_coordinates(origin_name)
         destination_coord = self.coordinate_extractor.get_coordinates(destination_name)
         
         if not origin_coord or not destination_coord:
-            print(f"Failed to get coordinates for {origin_name} or {destination_name}")
+            self._debug_print(f"Failed to get coordinates for {origin_name} or {destination_name}")
             return None
         
-        # Step 2: Determine route type and segments
-        origin_is_port = self.port_finder.is_port_city(origin_name)
-        destination_is_port = self.port_finder.is_port_city(destination_name)
+        # Step 2: Smart route analysis
+        route_analysis = self._analyze_route_requirements(origin_name, destination_name, origin_coord, destination_coord)
         
         segments = []
         route_description = ""
         
-        if origin_is_port and destination_is_port:
-            # Port to Port - Only sea route
-            route_description = f"Port to Port: {origin_name} -> {destination_name}"
+        if route_analysis['recommended_mode'] == 'land_only':
+            # Direct land route is optimal
+            route_description = f"Land-only route: {origin_name} -> {destination_name}"
+            segments = self._create_land_route(origin_coord, destination_coord, origin_name, destination_name)
+            
+        elif route_analysis['recommended_mode'] == 'sea_only':
+            # Sea route between ports
+            route_description = f"Sea route: {origin_name} -> {destination_name}"
             segments = self._create_sea_route(origin_coord, destination_coord, origin_name, destination_name)
             
-        elif not origin_is_port and not destination_is_port:
-            # Inland to Inland - Land-Sea-Land route
-            route_description = f"Inland to Inland: {origin_name} -> {destination_name}"
-            segments = self._create_land_sea_land_route(origin_coord, destination_coord, origin_name, destination_name)
-            
-        elif origin_is_port and not destination_is_port:
-            # Port to Inland - Sea-Land route
-            route_description = f"Port to Inland: {origin_name} -> {destination_name}"
-            segments = self._create_sea_land_route(origin_coord, destination_coord, origin_name, destination_name)
-            
-        else:  # not origin_is_port and destination_is_port
-            # Inland to Port - Land-Sea route
-            route_description = f"Inland to Port: {origin_name} -> {destination_name}"
-            segments = self._create_land_sea_route(origin_coord, destination_coord, origin_name, destination_name)
+        elif route_analysis['recommended_mode'] == 'multimodal':
+            # Multimodal route is justified
+            if route_analysis['origin_is_port'] and route_analysis['destination_is_port']:
+                route_description = f"Port to Port: {origin_name} -> {destination_name}"
+                segments = self._create_sea_route(origin_coord, destination_coord, origin_name, destination_name)
+            elif not route_analysis['origin_is_port'] and not route_analysis['destination_is_port']:
+                route_description = f"Multimodal route: {origin_name} -> {destination_name}"
+                segments = self._create_land_sea_land_route(origin_coord, destination_coord, origin_name, destination_name)
+            elif route_analysis['origin_is_port'] and not route_analysis['destination_is_port']:
+                route_description = f"Port to Inland: {origin_name} -> {destination_name}"
+                segments = self._create_sea_land_route(origin_coord, destination_coord, origin_name, destination_name)
+            else:
+                route_description = f"Inland to Port: {origin_name} -> {destination_name}"
+                segments = self._create_land_sea_route(origin_coord, destination_coord, origin_name, destination_name)
         
         if not segments:
             return None
@@ -351,6 +772,207 @@ class EnhancedRouteCalculator:
             total_waypoints=total_waypoints,
             route_description=route_description
         )
+    
+    def _analyze_route_requirements(self, origin_name: str, destination_name: str, origin_coord: Coordinate, destination_coord: Coordinate) -> Dict:
+        """
+        Analyze route requirements to determine the most practical transport mode
+        """
+        # Get basic information
+        origin_is_port = self.port_finder.is_port_city(origin_name)
+        destination_is_port = self.port_finder.is_port_city(destination_name)
+        
+        # Calculate straight-line distance
+        direct_distance_km = self._calculate_haversine_distance(origin_coord, destination_coord)
+        
+        # Extract country information (simple heuristic)
+        origin_country = self._extract_country(origin_name)
+        destination_country = self._extract_country(destination_name)
+        
+        # Check if it's a domestic route
+        is_domestic = origin_country and destination_country and origin_country.lower() == destination_country.lower()
+        
+        # Check if there's a major water body crossing
+        requires_water_crossing = self._requires_water_crossing(origin_coord, destination_coord, origin_country, destination_country)
+        
+        # Determine recommended mode based on smart criteria
+        recommended_mode = self._determine_optimal_mode(
+            is_domestic, direct_distance_km, requires_water_crossing, 
+            origin_is_port, destination_is_port, origin_country, destination_country
+        )
+        
+        return {
+            'recommended_mode': recommended_mode,
+            'is_domestic': is_domestic,
+            'direct_distance_km': direct_distance_km,
+            'requires_water_crossing': requires_water_crossing,
+            'origin_is_port': origin_is_port,
+            'destination_is_port': destination_is_port,
+            'origin_country': origin_country,
+            'destination_country': destination_country
+        }
+    
+    def _extract_country(self, place_name: str) -> Optional[str]:
+        """Extract country from place name (simple heuristic)"""
+        # Look for common country patterns
+        place_lower = place_name.lower()
+        
+        # Common country mappings
+        country_patterns = {
+            'colombia': ['colombia', 'bogotá', 'medellin', 'medellín', 'cali', 'barranquilla', 'cartagena'],
+            'usa': ['usa', 'united states', 'miami', 'new york', 'los angeles', 'chicago', 'denver', 'salt lake city'],
+            'brazil': ['brazil', 'brasil', 'são paulo', 'rio de janeiro', 'santos', 'salvador'],
+            'spain': ['spain', 'españa', 'madrid', 'barcelona', 'valencia', 'sevilla'],
+            'uk': ['uk', 'united kingdom', 'london', 'manchester', 'liverpool', 'glasgow'],
+            'germany': ['germany', 'deutschland', 'hamburg', 'berlin', 'munich', 'frankfurt'],
+            'china': ['china', 'shanghai', 'beijing', 'guangzhou', 'shenzhen'],
+            'cuba': ['cuba', 'havana', 'habana']
+        }
+        
+        for country, patterns in country_patterns.items():
+            if any(pattern in place_lower for pattern in patterns):
+                return country
+        
+        # If place name contains country, try to extract it
+        if ',' in place_name:
+            parts = [p.strip() for p in place_name.split(',')]
+            if len(parts) >= 2:
+                return parts[-1]  # Last part is usually country
+        
+        return None
+    
+    def _requires_water_crossing(self, origin: Coordinate, destination: Coordinate, origin_country: Optional[str], destination_country: Optional[str]) -> bool:
+        """Determine if route requires crossing major water bodies"""
+        
+        # Specific water crossing cases
+        water_crossings = [
+            # US to Cuba/Caribbean
+            ('usa', 'cuba'),
+            ('usa', 'jamaica'),
+            ('usa', 'bahamas'),
+            
+            # Europe to Americas
+            ('uk', 'usa'), ('germany', 'usa'), ('spain', 'usa'),
+            ('uk', 'brazil'), ('germany', 'brazil'), ('spain', 'brazil'),
+            
+            # Asia to Americas/Europe
+            ('china', 'usa'), ('china', 'uk'), ('china', 'germany'),
+            ('japan', 'usa'), ('japan', 'uk'),
+            
+            # Australia to anywhere
+            ('australia', 'usa'), ('australia', 'uk'), ('australia', 'china'),
+        ]
+        
+        if origin_country and destination_country:
+            country_pair = (origin_country.lower(), destination_country.lower())
+            reverse_pair = (destination_country.lower(), origin_country.lower())
+            
+            return country_pair in water_crossings or reverse_pair in water_crossings
+        
+        # Geographic heuristics for major water crossings
+        # Atlantic crossing (longitude difference > 60 degrees and crossing prime meridian)
+        if abs(origin.lon - destination.lon) > 60:
+            # Likely crossing Atlantic or Pacific
+            return True
+        
+        # Caribbean/Gulf crossings (specific coordinate ranges)
+        if (origin.lat > 20 and origin.lat < 30 and origin.lon > -90 and origin.lon < -75 and
+            destination.lat > 20 and destination.lat < 30 and destination.lon > -85 and destination.lon < -70):
+            return True
+        
+        return False
+    
+    def _determine_optimal_mode(self, is_domestic: bool, distance_km: float, requires_water_crossing: bool, 
+                               origin_is_port: bool, destination_is_port: bool, 
+                               origin_country: Optional[str], destination_country: Optional[str]) -> str:
+        """Determine the optimal transport mode based on route characteristics"""
+        
+        # Rule 1: Domestic routes under 1500km should prefer land-only
+        if is_domestic and distance_km < 1500:
+            return 'land_only'
+        
+        # Rule 2: Routes requiring water crossing should use sea transport
+        if requires_water_crossing:
+            if origin_is_port and destination_is_port:
+                return 'sea_only'
+            else:
+                return 'multimodal'
+        
+        # Rule 3: Short international routes without water crossing prefer land
+        if distance_km < 800:  # Short distance
+            return 'land_only'
+        
+        # Rule 4: Port-to-port routes over 1000km prefer sea
+        if origin_is_port and destination_is_port and distance_km > 1000:
+            return 'sea_only'
+        
+        # Rule 5: Very long distances (>2500km) without clear land connectivity
+        if distance_km > 2500:
+            # Check for continental connectivity
+            if self._are_continentally_connected(origin_country, destination_country):
+                return 'land_only'
+            else:
+                return 'multimodal'
+        
+        # Rule 6: Medium distances (800-2500km) - prefer land for continental routes
+        if distance_km <= 2500:
+            if self._are_continentally_connected(origin_country, destination_country):
+                return 'land_only'
+            else:
+                return 'multimodal'
+        
+        # Default to multimodal for complex cases
+        return 'multimodal'
+    
+    def _are_continentally_connected(self, country1: Optional[str], country2: Optional[str]) -> bool:
+        """Check if two countries are on the same continent with good land connectivity"""
+        if not country1 or not country2:
+            return False
+        
+        continental_groups = {
+            'north_america': ['usa', 'canada', 'mexico'],
+            'south_america': ['colombia', 'brazil', 'argentina', 'chile', 'peru', 'ecuador', 'venezuela'],
+            'europe': ['uk', 'germany', 'france', 'spain', 'italy', 'netherlands', 'belgium'],
+            'asia': ['china', 'japan', 'india', 'south korea', 'singapore', 'thailand'],
+        }
+        
+        for continent, countries in continental_groups.items():
+            if country1.lower() in countries and country2.lower() in countries:
+                return True
+        
+        return False
+    
+    def _calculate_haversine_distance(self, coord1: Coordinate, coord2: Coordinate) -> float:
+        """Calculate the great circle distance between two points on Earth"""
+        import math
+        
+        # Convert to radians
+        lat1, lon1 = math.radians(coord1.lat), math.radians(coord1.lon)
+        lat2, lon2 = math.radians(coord2.lat), math.radians(coord2.lon)
+        
+        # Haversine formula
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+        a = math.sin(dlat/2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon/2)**2
+        c = 2 * math.asin(math.sqrt(a))
+        
+        # Earth's radius in km
+        r = 6371
+        
+        return c * r
+    
+    def _create_land_route(self, origin: Coordinate, destination: Coordinate, origin_name: str, destination_name: str) -> List[RouteSegment]:
+        """Create a direct land-only route between two points"""
+        waypoints = [origin, destination]
+        distance = self._calculate_distance(waypoints)
+        
+        return [RouteSegment(
+            type=SegmentType.LAND,
+            origin=origin,
+            destination=destination,
+            waypoints=waypoints,
+            description=f"Land: {origin_name} -> {destination_name}",
+            distance_km=distance
+        )]
     
     def _create_sea_route(self, origin: Coordinate, destination: Coordinate, origin_name: str, destination_name: str) -> List[RouteSegment]:
         """Create a sea-only route between two ports"""
@@ -551,13 +1173,13 @@ def route_to_json(route: EnhancedRoute) -> Dict[str, Any]:
 
 # Example usage and testing
 if __name__ == "__main__":
-    calculator = EnhancedRouteCalculator()
-    
     # Check if running as command line tool
     if len(sys.argv) >= 4 and sys.argv[1] == "calculate_route":
         origin = sys.argv[2]
         destination = sys.argv[3]
         
+        # When called as API, disable debug output to keep JSON clean
+        calculator = EnhancedRouteCalculator(debug=False)
         route = calculator.calculate_enhanced_route(origin, destination)
         if route:
             print(json.dumps(route_to_json(route)))
@@ -565,7 +1187,8 @@ if __name__ == "__main__":
             print(json.dumps({"error": "Failed to calculate route"}))
         sys.exit(0)
     
-    # Interactive testing mode
+    # Interactive testing mode with debug enabled
+    calculator = EnhancedRouteCalculator(debug=True)
     test_routes = [
         ("Shanghai", "Bogota"),     # Port to inland
         ("Shanghai", "Rotterdam"),  # Port to port
