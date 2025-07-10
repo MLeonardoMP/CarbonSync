@@ -50,10 +50,10 @@ export class EnhancedRouteService {
     }
   }
 
-  async calculateEnhancedRoute(origin: string, destination: string): Promise<EnhancedRouteResponse> {
+  async calculateEnhancedRoute(origin: string, destination: string, seaRouteResolution: number = 5): Promise<EnhancedRouteResponse> {
     try {
       // First get the route from Python script
-      const pythonResult = await this.calculatePythonRoute(origin, destination);
+      const pythonResult = await this.calculatePythonRoute(origin, destination, seaRouteResolution);
       
       if (!pythonResult.success || !pythonResult.route) {
         return pythonResult;
@@ -78,12 +78,12 @@ export class EnhancedRouteService {
     }
   }
 
-  private async calculatePythonRoute(origin: string, destination: string): Promise<EnhancedRouteResponse> {
+  private async calculatePythonRoute(origin: string, destination: string, seaRouteResolution: number = 5): Promise<EnhancedRouteResponse> {
     return new Promise((resolve) => {
       // Try different Python commands based on the platform
       const pythonCommand = process.platform === 'win32' ? 'python' : 'python3';
       
-      const pythonProcess = spawn(pythonCommand, [this.pythonScriptPath, 'calculate_route', origin, destination], {
+      const pythonProcess = spawn(pythonCommand, [this.pythonScriptPath, 'calculate_route', origin, destination, seaRouteResolution.toString()], {
         stdio: ['pipe', 'pipe', 'pipe']
       });
 
@@ -206,59 +206,90 @@ export class EnhancedRouteService {
   }
 
   /**
-   * Normalize longitude coordinates to handle International Date Line crossing
+   * Normalize coordinates and split at dateline crossings to prevent rendering artifacts
    */
-  private normalizeLongitudeCrossing(coordinates: Array<[number, number]>): Array<[number, number]> {
-    if (coordinates.length < 2) return coordinates;
+  private normalizeLongitudeCrossing(coordinates: Array<[number, number]>): Array<Array<[number, number]>> {
+    if (coordinates.length < 2) return [coordinates];
     
-    const normalized: Array<[number, number]> = [coordinates[0]];
+    // First normalize all coordinates to [-180, 180] range
+    const normalized = coordinates.map(([lon, lat]): [number, number] => {
+      let normalizedLon = lon;
+      while (normalizedLon > 180) normalizedLon -= 360;
+      while (normalizedLon < -180) normalizedLon += 360;
+      return [normalizedLon, lat];
+    });
     
-    for (let i = 1; i < coordinates.length; i++) {
-      const prevLon = normalized[normalized.length - 1][0];
-      const [currLon, currLat] = coordinates[i];
+    // Split into multiple segments when crossing the dateline
+    const segments: Array<Array<[number, number]>> = [];
+    let currentSegment: Array<[number, number]> = [normalized[0]];
+    
+    for (let i = 1; i < normalized.length; i++) {
+      const prevLon = currentSegment[currentSegment.length - 1][0];
+      const [currLon, currLat] = normalized[i];
       
-      const lonDiff = currLon - prevLon;
-      let adjustedLon = currLon;
+      // Check if we're crossing the dateline (difference > 180°)
+      const lonDiff = Math.abs(currLon - prevLon);
       
       if (lonDiff > 180) {
-        // Crossing from east to west (e.g., 179° to -179°)
-        adjustedLon = currLon - 360;
-      } else if (lonDiff < -180) {
-        // Crossing from west to east (e.g., -179° to 179°)
-        adjustedLon = currLon + 360;
+        // We're crossing the dateline, end current segment and start new one
+        if (currentSegment.length > 1) {
+          segments.push([...currentSegment]);
+        }
+        currentSegment = [[currLon, currLat]];
+      } else {
+        // No crossing, continue current segment
+        currentSegment.push([currLon, currLat]);
       }
-      
-      normalized.push([adjustedLon, currLat]);
     }
     
-    return normalized;
+    // Add the final segment
+    if (currentSegment.length > 1) {
+      segments.push(currentSegment);
+    } else if (currentSegment.length === 1 && segments.length > 0) {
+      // If we have a single point left, add it to the last segment
+      if (segments[segments.length - 1].length > 0) {
+        segments[segments.length - 1].push(currentSegment[0]);
+      }
+    }
+    
+    // If no segments were created, return the original normalized coordinates
+    return segments.length > 0 ? segments : [normalized];
   }
 
   /**
    * Convert enhanced route to GeoJSON for map visualization
    */
   routeToGeoJSON(route: EnhancedRoute): any {
-    const features = route.segments.map((segment, index) => {
+    const features: any[] = [];
+    
+    route.segments.forEach((segment, segmentIndex) => {
       // Convert waypoints to coordinate array
       const coordinates = segment.waypoints.map(wp => [wp.lon, wp.lat] as [number, number]);
       
-      // Normalize coordinates to handle International Date Line crossing
-      const normalizedCoordinates = this.normalizeLongitudeCrossing(coordinates);
+      // Normalize coordinates and split at dateline crossings
+      const coordinateSegments = this.normalizeLongitudeCrossing(coordinates);
       
-      return {
-        type: 'Feature',
-        properties: {
-          id: `segment-${index}`,
-          type: segment.type,
-          description: segment.description,
-          distance_km: segment.distance_km,
-          waypoint_count: segment.waypoints.length
-        },
-        geometry: {
-          type: 'LineString',
-          coordinates: normalizedCoordinates
+      // Create a separate feature for each coordinate segment to handle dateline crossing
+      coordinateSegments.forEach((coordSegment, subIndex) => {
+        if (coordSegment.length >= 2) {
+          features.push({
+            type: 'Feature',
+            properties: {
+              id: `segment-${segmentIndex}-${subIndex}`,
+              type: segment.type,
+              description: segment.description,
+              distance_km: segment.distance_km,
+              waypoint_count: segment.waypoints.length,
+              segment_index: segmentIndex,
+              sub_segment: subIndex
+            },
+            geometry: {
+              type: 'LineString',
+              coordinates: coordSegment
+            }
+          });
         }
-      };
+      });
     });
 
     return {

@@ -893,13 +893,16 @@ class PortFinder:
 def normalize_longitude_crossing(coordinates: List[List[float]]) -> List[List[float]]:
     """
     Normalize longitude coordinates to handle International Date Line crossing.
-    Fixes coordinates that go beyond -180/+180 range due to dateline crossing.
+    
+    This function normalizes coordinates to [-180, 180] range and preserves
+    the original coordinate structure for proper route visualization.
+    The TypeScript side will handle splitting for map rendering.
     """
     if len(coordinates) < 2:
         return coordinates
     
+    # Normalize all coordinates to [-180, 180] range
     normalized = []
-    
     for coord in coordinates:
         lon, lat = coord[0], coord[1]
         
@@ -911,38 +914,21 @@ def normalize_longitude_crossing(coordinates: List[List[float]]) -> List[List[fl
             
         normalized.append([lon, lat])
     
-    # Now handle continuity for map visualization
-    if len(normalized) < 2:
-        return normalized
-        
-    continuous = [normalized[0]]
-    
-    for i in range(1, len(normalized)):
-        prev_lon = continuous[-1][0]
-        curr_lon = normalized[i][0]
-        curr_lat = normalized[i][1]
-        
-        # Calculate the difference between consecutive longitudes
-        lon_diff = curr_lon - prev_lon
-        
-        # If the difference is greater than 180°, choose the shorter path
-        if lon_diff > 180:
-            # Cross the other way (subtract 360)
-            adjusted_lon = curr_lon - 360
-        elif lon_diff < -180:
-            # Cross the other way (add 360)
-            adjusted_lon = curr_lon + 360
-        else:
-            # No crossing, keep normalized longitude
-            adjusted_lon = curr_lon
-        
-        continuous.append([adjusted_lon, curr_lat])
-    
-    return continuous
+    return normalized
 
-def get_maritime_route(from_lon: float, from_lat: float, to_lon: float, to_lat: float, resolution: int = 20) -> Optional[List[List[float]]]:
+def get_maritime_route(from_lon: float, from_lat: float, to_lon: float, to_lat: float, resolution: int = 5) -> Optional[List[List[float]]]:
     """
     Get maritime route coordinates between two points using SeaRoute
+    
+    Args:
+        from_lon: Origin longitude
+        from_lat: Origin latitude
+        to_lon: Destination longitude
+        to_lat: Destination latitude
+        resolution: Route resolution in kilometers (default: 5km for high detail)
+    
+    Returns:
+        List of coordinate pairs [lon, lat] representing the maritime route
     """
     # Path to SeaRoute in this project
     script_dir = os.path.dirname(os.path.abspath(__file__))
@@ -1002,10 +988,11 @@ def get_maritime_route(from_lon: float, from_lat: float, to_lon: float, to_lat: 
 class EnhancedRouteCalculator:
     """Enhanced route calculator with segment-focused optimization"""
     
-    def __init__(self, debug=False):
+    def __init__(self, debug=False, sea_route_resolution=5):
         self.coordinate_extractor = CoordinateExtractor()
         self.port_finder = PortFinder()
         self.debug = debug
+        self.sea_route_resolution = sea_route_resolution
     
     def _debug_print(self, message):
         """Print debug message only when debug mode is enabled"""
@@ -1272,7 +1259,7 @@ class EnhancedRouteCalculator:
     
     def _create_sea_route(self, origin: Coordinate, destination: Coordinate, origin_name: str, destination_name: str) -> List[RouteSegment]:
         """Create a sea-only route between two ports"""
-        waypoints_raw = get_maritime_route(origin.lon, origin.lat, destination.lon, destination.lat)
+        waypoints_raw = get_maritime_route(origin.lon, origin.lat, destination.lon, destination.lat, self.sea_route_resolution)
         if not waypoints_raw:
             return []
         
@@ -1315,7 +1302,7 @@ class EnhancedRouteCalculator:
         ))
         
         # Segment 2: Sea route between ports
-        sea_waypoints_raw = get_maritime_route(origin_port.lon, origin_port.lat, destination_port.lon, destination_port.lat)
+        sea_waypoints_raw = get_maritime_route(origin_port.lon, origin_port.lat, destination_port.lon, destination_port.lat, self.sea_route_resolution)
         if sea_waypoints_raw:
             sea_waypoints = [Coordinate(lon=coord[0], lat=coord[1]) for coord in sea_waypoints_raw]
             segments.append(RouteSegment(
@@ -1353,7 +1340,7 @@ class EnhancedRouteCalculator:
         destination_port = Coordinate(destination_port_data['lon'], destination_port_data['lat'])
         
         # Segment 1: Sea route to destination port
-        sea_waypoints_raw = get_maritime_route(origin.lon, origin.lat, destination_port.lon, destination_port.lat)
+        sea_waypoints_raw = get_maritime_route(origin.lon, origin.lat, destination_port.lon, destination_port.lat, self.sea_route_resolution)
         if sea_waypoints_raw:
             sea_waypoints = [Coordinate(lon=coord[0], lat=coord[1]) for coord in sea_waypoints_raw]
             segments.append(RouteSegment(
@@ -1403,7 +1390,7 @@ class EnhancedRouteCalculator:
         
         # Segment 2: Sea route from port to destination
         # Get raw coordinates first
-        sea_waypoints_raw = get_maritime_route(origin_port.lon, origin_port.lat, destination.lon, destination.lat)
+        sea_waypoints_raw = get_maritime_route(origin_port.lon, origin_port.lat, destination.lon, destination.lat, self.sea_route_resolution)
         if sea_waypoints_raw:
             # Convert to Coordinate objects
             sea_waypoints = [Coordinate(lon=coord[0], lat=coord[1]) for coord in sea_waypoints_raw]
@@ -1473,9 +1460,10 @@ if __name__ == "__main__":
     if len(sys.argv) >= 4 and sys.argv[1] == "calculate_route":
         origin = sys.argv[2]
         destination = sys.argv[3]
+        sea_route_resolution = int(sys.argv[4]) if len(sys.argv) >= 5 else 5
         
         # When called as API, disable debug output to keep JSON clean
-        calculator = EnhancedRouteCalculator(debug=False)
+        calculator = EnhancedRouteCalculator(debug=False, sea_route_resolution=sea_route_resolution)
         route = calculator.calculate_enhanced_route(origin, destination)
         if route:
             print(json.dumps(route_to_json(route)))
