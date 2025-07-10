@@ -178,7 +178,7 @@ export function LocationAutocomplete({
       {isOpen && suggestions.length > 0 && (
         <div
           ref={dropdownRef}
-          className="absolute top-full z-50 w-full mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto"
+          className="absolute top-full z-50 w-full min-w-[300px] mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto"
         >
           {suggestions.map((location, index) => (
             <div
@@ -195,18 +195,18 @@ export function LocationAutocomplete({
                 {getLocationIcon(location.type)}
               </div>
               
-              <div className="flex-1 min-w-0">
-                <div className="font-medium truncate">
+              <div className="flex-1">
+                <div className="font-medium">
                   {location.name}
                 </div>
-                <div className="text-xs text-muted-foreground truncate">
+                <div className="text-xs text-muted-foreground">
                   {getLocationTypeLabel(location.type)} • {location.country}
                 </div>
               </div>
               
               <div className="flex-shrink-0">
                 <span className={cn(
-                  "inline-flex items-center rounded-full px-2 py-1 text-xs font-medium",
+                  "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
                   location.type === 'port' && "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
                   location.type === 'city' && "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
                   location.type === 'airport' && "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
