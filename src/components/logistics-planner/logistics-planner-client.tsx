@@ -23,7 +23,6 @@ import { useUser } from '@/hooks/use-user';
 import { Separator } from '@/components/ui/separator';
 import { MapStyleControl } from '@/components/geo-visor/map-style-control';
 import { MapProjectionControl } from '@/components/geo-visor/map-projection-control';
-import { GearsmapLogo } from '@/components/icons/gearsmap-logo';
 
 const legSchema = z.object({
   origin: z.string().min(2, 'Origin is required.'),
