@@ -178,14 +178,19 @@ export function LocationAutocomplete({
       {isOpen && suggestions.length > 0 && (
         <div
           ref={dropdownRef}
-          className="absolute top-full z-50 w-full min-w-[300px] mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto"
+          className="absolute top-full left-0 z-50 mt-1 bg-popover border border-border rounded-md shadow-lg max-h-60 overflow-auto"
+          style={{ 
+            width: 'max-content', 
+            minWidth: '100%',
+            maxWidth: '600px' 
+          }}
         >
           {suggestions.map((location, index) => (
             <div
               key={`${location.name}-${location.country}-${index}`}
               ref={el => { suggestionRefs.current[index] = el; }}
               className={cn(
-                "flex items-center gap-3 px-3 py-2 cursor-pointer text-sm transition-colors",
+                "flex items-center gap-3 px-4 py-3 cursor-pointer text-sm transition-colors",
                 "hover:bg-accent hover:text-accent-foreground",
                 highlightedIndex === index && "bg-accent text-accent-foreground"
               )}
@@ -196,24 +201,12 @@ export function LocationAutocomplete({
               </div>
               
               <div className="flex-1">
-                <div className="font-medium">
+                <div className="font-medium text-base">
                   {location.name}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   {getLocationTypeLabel(location.type)} • {location.country}
                 </div>
-              </div>
-              
-              <div className="flex-shrink-0">
-                <span className={cn(
-                  "inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium",
-                  location.type === 'port' && "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300",
-                  location.type === 'city' && "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300",
-                  location.type === 'airport' && "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-300",
-                  (location.type === 'warehouse' || location.type === 'logistics_hub') && "bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-300"
-                )}>
-                  {getLocationTypeLabel(location.type)}
-                </span>
               </div>
             </div>
           ))}
