@@ -172,7 +172,14 @@ export function EnhancedLogisticsPlannerClient({ mapboxToken }: { mapboxToken: s
                     <div className="space-y-4">
                       {fields.map((field, index) => (
                         <Card key={field.id} className="relative bg-muted/50 p-4">
-                          <FormLabel className="text-sm font-medium">Journey {index + 1}</FormLabel>
+                          <div className="flex items-center justify-between">
+                            <FormLabel className="text-sm font-medium">Journey {index + 1}</FormLabel>
+                            {fields.length > 1 && (
+                              <Badge variant="outline" className="text-xs">
+                                Leg {index + 1} of {fields.length}
+                              </Badge>
+                            )}
+                          </div>
                           <div className="mt-2 grid grid-cols-1 gap-4 sm:grid-cols-2">
                             <FormField
                               control={form.control}
@@ -243,7 +250,10 @@ export function EnhancedLogisticsPlannerClient({ mapboxToken }: { mapboxToken: s
                       Add Journey
                     </Button>
                     <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? 'Calculating Enhanced Route...' : 'Calculate Enhanced Route'}
+                      {isLoading ? 
+                        `Calculating ${fields.length > 1 ? `${fields.length} Enhanced Routes` : 'Enhanced Route'}...` : 
+                        `Calculate ${fields.length > 1 ? `${fields.length} Enhanced Routes` : 'Enhanced Route'}`
+                      }
                     </Button>
                   </form>
                 </Form>
@@ -279,6 +289,11 @@ export function EnhancedLogisticsPlannerClient({ mapboxToken }: { mapboxToken: s
                       <CardTitle className="flex items-center gap-2">
                         <Route className="h-5 w-5 text-accent" />
                         Enhanced Route Overview
+                        {form.getValues('legs').length > 1 && (
+                          <Badge variant="secondary" className="ml-2">
+                            {form.getValues('legs').length} Journeys Combined
+                          </Badge>
+                        )}
                       </CardTitle>
                       <CardDescription>{result.calculatedRoute.route_description}</CardDescription>
                     </CardHeader>

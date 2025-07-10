@@ -78,34 +78,65 @@ export async function planEnhancedLogisticsJourney(
 ): Promise<PlanEnhancedLogisticsJourneyOutput> {
   const routeService = new EnhancedRouteService();
   
-  // For now, handle single leg journeys (can be extended to multi-leg)
-  const leg = input.legs[0];
-  if (!leg) {
+  // Handle multiple journey legs
+  if (input.legs.length === 0) {
     throw new Error('At least one journey leg is required');
   }
 
-  // Calculate the enhanced route using our Python service
-  const routeResult = await routeService.calculateEnhancedRoute(leg.origin, leg.destination);
+  // Process all legs and combine them into a single route
+  const allSegments = [];
+  const allValidations = [];
+  let totalDistance = 0;
+  let totalWaypoints = 0;
+  let combinedDescription = '';
   
-  if (!routeResult.success || !routeResult.route) {
-    throw new Error(`Failed to calculate route: ${routeResult.error}`);
+  for (let i = 0; i < input.legs.length; i++) {
+    const leg = input.legs[i];
+    
+    // Calculate the enhanced route for this leg
+    const routeResult = await routeService.calculateEnhancedRoute(leg.origin, leg.destination);
+    
+    if (!routeResult.success || !routeResult.route) {
+      throw new Error(`Failed to calculate route for leg ${i + 1} (${leg.origin} to ${leg.destination}): ${routeResult.error}`);
+    }
+
+    const legRoute = routeResult.route;
+    
+    // Add segments from this leg to the combined route
+    allSegments.push(...legRoute.segments);
+    totalDistance += legRoute.total_distance_km;
+    totalWaypoints += legRoute.total_waypoints;
+    
+    // Build combined description
+    if (i === 0) {
+      combinedDescription = legRoute.route_description;
+    } else {
+      combinedDescription += ` | Journey ${i + 1}: ${legRoute.route_description}`;
+    }
+    
+    // Validate this leg's route
+    const validation = routeService.validateRoute(legRoute);
+    allValidations.push(validation);
   }
 
-  const enhancedRoute = routeResult.route;
+  // Create combined enhanced route
+  const combinedRoute = {
+    segments: allSegments,
+    total_distance_km: totalDistance,
+    total_waypoints: totalWaypoints,
+    route_description: combinedDescription
+  };
 
-  // Validate the route and identify potential issues
-  const validation = routeService.validateRoute(enhancedRoute);
-  
-  // Use AI to enhance the route with emissions, cost, and time estimates
-  // Include validation results for better decision making
+  // Use AI to enhance the combined route with emissions, cost, and time estimates
+  // Use the first leg's cargo weight for calculations (could be enhanced to handle per-leg weights)
   const enhancedOutput = await planEnhancedLogisticsJourneyFlow({
-    route: enhancedRoute,
-    cargoWeightTons: leg.cargoWeightTons,
-    validation: validation
+    route: combinedRoute,
+    cargoWeightTons: input.legs[0].cargoWeightTons,
+    validation: allValidations[0] // Use first validation for now
   });
 
-  // Generate GeoJSON for the route
-  const geoJson = routeService.routeToGeoJSON(enhancedRoute);
+  // Generate GeoJSON for the combined route
+  const geoJson = routeService.routeToGeoJSON(combinedRoute);
 
   return {
     ...enhancedOutput,
