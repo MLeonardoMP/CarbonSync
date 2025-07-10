@@ -7,6 +7,11 @@ import { ThemeProvider } from '@/components/providers/theme-provider';
 export const metadata: Metadata = {
   title: 'CarbonSync',
   description: 'Intelligent Logistics & Emissions Management',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
 };
 
 export default function RootLayout({
