@@ -23,6 +23,7 @@ import { Separator } from '@/components/ui/separator';
 import { MapStyleControl } from '@/components/geo-visor/map-style-control';
 import { MapProjectionControl } from '@/components/geo-visor/map-projection-control';
 import { Badge } from '@/components/ui/badge';
+import { LocationAutocomplete } from '@/components/ui/location-autocomplete';
 
 const legSchema = z.object({
   origin: z.string().min(2, 'Origin is required.'),
@@ -188,7 +189,11 @@ export function EnhancedLogisticsPlannerClient({ mapboxToken }: { mapboxToken: s
                                 <FormItem>
                                   <FormLabel>Origin</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="e.g., Shanghai" {...field} />
+                                    <LocationAutocomplete 
+                                      value={field.value} 
+                                      onChange={field.onChange}
+                                      placeholder="e.g., Shanghai"
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
@@ -201,7 +206,11 @@ export function EnhancedLogisticsPlannerClient({ mapboxToken }: { mapboxToken: s
                                 <FormItem>
                                   <FormLabel>Destination</FormLabel>
                                   <FormControl>
-                                    <Input placeholder="e.g., Bogota" {...field} />
+                                    <LocationAutocomplete 
+                                      value={field.value} 
+                                      onChange={field.onChange}
+                                      placeholder="e.g., Bogota"
+                                    />
                                   </FormControl>
                                   <FormMessage />
                                 </FormItem>
