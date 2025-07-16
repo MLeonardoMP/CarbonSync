@@ -4,9 +4,8 @@ import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { format } from 'date-fns';
 import type { MapRef } from 'react-map-gl';
-import { subDays, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, isWithinInterval } from 'date-fns';
-import type { Interval } from 'date-fns';
 
 import { vehicles as initialVehicles, updateAllVehiclePositions } from '@/lib/data';
 import type { Vehicle, Mode, Region, Carrier } from '@/types';
@@ -44,14 +43,22 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
   const [isSidebarOpen, setSidebarOpen] = React.useState(true);
   const [vehicles, setVehicles] = useState<Vehicle[]>(initialVehicles);
   const [isRealTimeActive, setIsRealTimeActive] = useState(true);
+  const [lastUpdateTime, setLastUpdateTime] = useState<string>('');
+  const [isClient, setIsClient] = useState(false);
   const mapRef = useRef<MapRef>(null);
+
+  // Set client flag after hydration
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Real-time vehicle position updates
   useEffect(() => {
     if (!isRealTimeActive) return;
 
     const interval = setInterval(() => {
-      setVehicles(currentVehicles => updateAllVehiclePositions(currentVehicles));
+      setVehicles(currentVehicles => updateAllVehiclePositions(currentVehicles)); // Don't use seed for client-side updates
+      setLastUpdateTime(format(new Date(), 'HH:mm:ss'));
     }, 3000); // Update every 3 seconds
 
     return () => clearInterval(interval);
@@ -69,7 +76,6 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
     carrier: 'all' as Carrier | 'all',
     emissions: 10,
   });
-  const [timeRange, setTimeRange] = useState<'week' | 'month' | 'quarter'>('month');
   const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
 
   const handleAiSearch = async (values: z.infer<typeof searchSchema>) => {
@@ -98,34 +104,21 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
   };
 
   const filteredVehicles = useMemo(() => {
-    const now = new Date();
-    let interval: Interval;
-
-    switch (timeRange) {
-        case 'week':
-            interval = { start: subDays(now, 7), end: now };
-            break;
-        case 'quarter':
-            interval = { start: startOfQuarter(now), end: endOfQuarter(now) };
-            break;
-        case 'month':
-        default:
-            interval = { start: startOfMonth(now), end: endOfMonth(now) };
-            break;
-    }
-
     return vehicles.filter(v => {
-      if (!isWithinInterval(new Date(v.lastUpdated), interval)) return false;
+      // Apply role-based filtering
       if (role === 'carrier' && userCarrier && v.carrier !== userCarrier) {
         return false;
       }
+      
+      // Apply filter bar filters
       if (filters.mode !== 'all' && v.mode !== filters.mode) return false;
       if (filters.region !== 'all' && v.region !== filters.region) return false;
       if (role !== 'carrier' && filters.carrier !== 'all' && v.carrier !== filters.carrier) return false;
       if (v.co2e > filters.emissions) return false;
+      
       return true;
     });
-  }, [filters, role, userCarrier, timeRange]);
+  }, [filters, role, userCarrier, vehicles]);
   
   const totalEmissions = useMemo(
     () => filteredVehicles.reduce((acc, v) => acc + v.co2e, 0).toFixed(2),
@@ -391,7 +384,7 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                             </div>
                         </div>
                         <div className="pt-2 border-t text-xs text-center text-muted-foreground">
-                            Updates every 3 seconds • Last update: {new Date().toLocaleTimeString()}
+                            Updates every 3 seconds{isClient && lastUpdateTime && ` • Last update: ${lastUpdateTime}`}
                         </div>
                     </CardContent>
                 </Card>

@@ -74,6 +74,11 @@ function seededRandom() {
     return x - Math.floor(x);
 }
 
+// Reset seed for consistent data generation
+export function resetSeed() {
+  seed = 1;
+}
+
 const carriers: Carrier[] = ['EcoHaul', 'SwiftTrans', 'AquaGlide', 'RailForward'];
 const regions: Region[] = ['North America', 'Europe', 'Asia'];
 const modes: Mode[] = ['truck', 'rail', 'sea'];
@@ -96,21 +101,12 @@ export const vehicles: Vehicle[] = Array.from({ length: 50 }, (_, i) => {
   const mode = modes[Math.floor(seededRandom() * modes.length)];
   const region = regions[Math.floor(seededRandom() * regions.length)];
   const carrier = carriers[Math.floor(seededRandom() * carriers.length)];
-  
+
   let vehicleType: string;
   let specificFuelTypes: ('Diesel' | 'Electric' | 'Marine Gas Oil' | 'LNG')[];
 
   // Select appropriate route based on mode
-  let selectedRoute: RoutePoint[];
-  if (mode === 'sea') {
-    const seaRoutes = ['transpacific', 'transatlantic', 'asia_europe', 'mediterranean'];
-    const routeKey = seaRoutes[Math.floor(seededRandom() * seaRoutes.length)] as keyof typeof shippingRoutes;
-    selectedRoute = shippingRoutes[routeKey];
-  } else {
-    const landRoutes = ['us_transcontinental', 'european_corridor', 'asian_silk_road', 'china_europe_rail'];
-    const routeKey = landRoutes[Math.floor(seededRandom() * landRoutes.length)] as keyof typeof shippingRoutes;
-    selectedRoute = shippingRoutes[routeKey];
-  }
+  let selectedRoute: RoutePoint[] = shippingRoutes[Object.keys(shippingRoutes)[Math.floor(seededRandom() * Object.keys(shippingRoutes).length)] as keyof typeof shippingRoutes];
 
   const currentIndex = Math.floor(seededRandom() * selectedRoute.length);
   const currentPosition = selectedRoute[currentIndex];
@@ -142,7 +138,7 @@ export const vehicles: Vehicle[] = Array.from({ length: 50 }, (_, i) => {
       specificFuelTypes = ['Diesel'];
       break;
   }
-  
+
   const fuelType = specificFuelTypes[Math.floor(seededRandom() * specificFuelTypes.length)];
   const status = statuses[Math.floor(seededRandom() * statuses.length)];
   const cargoType = cargoTypes[Math.floor(seededRandom() * cargoTypes.length)];
@@ -183,7 +179,7 @@ export function interpolatePosition(point1: RoutePoint, point2: RoutePoint, prog
 }
 
 // Function to update vehicle position along its route
-export function updateVehiclePosition(vehicleId: string, vehicles: Vehicle[]): Vehicle[] {
+export function updateVehiclePosition(vehicleId: string, vehicles: Vehicle[], timestamp?: string): Vehicle[] {
   const route = vehicleRoutes.get(vehicleId);
   if (!route) return vehicles;
 
@@ -211,7 +207,7 @@ export function updateVehiclePosition(vehicleId: string, vehicles: Vehicle[]): V
       ? { 
           ...v, 
           position: newPosition,
-          lastUpdated: new Date().toISOString()
+          lastUpdated: timestamp || v.lastUpdated
         }
       : v
   );
@@ -220,12 +216,22 @@ export function updateVehiclePosition(vehicleId: string, vehicles: Vehicle[]): V
 }
 
 // Function to update all vehicles
-export function updateAllVehiclePositions(vehicles: Vehicle[]): Vehicle[] {
+export function updateAllVehiclePositions(vehicles: Vehicle[], seed?: number): Vehicle[] {
   let updatedVehicles = [...vehicles];
   
-  for (const vehicle of vehicles) {
-    if (Math.random() < 0.3) { // 30% chance to move each vehicle per update
-      updatedVehicles = updateVehiclePosition(vehicle.id, updatedVehicles);
+  // Use seeded random or vehicle index for deterministic behavior during SSR
+  for (let i = 0; i < vehicles.length; i++) {
+    const vehicle = vehicles[i];
+    const shouldMove = seed !== undefined 
+      ? ((seed + i) % 10) < 3  // 30% chance based on seed
+      : Math.random() < 0.3;   // 30% chance with Math.random for client-side only
+    
+    if (shouldMove) {
+      const timestamp = seed !== undefined 
+        ? new Date(baseTime + seed * 1000).toISOString()  // Deterministic timestamp for SSR
+        : new Date().toISOString();  // Current timestamp for client-side
+      
+      updatedVehicles = updateVehiclePosition(vehicle.id, updatedVehicles, timestamp);
     }
   }
   
