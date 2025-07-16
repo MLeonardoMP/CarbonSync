@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useMemo, useRef } from 'react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -8,7 +8,7 @@ import type { MapRef } from 'react-map-gl';
 import { subDays, startOfMonth, endOfMonth, startOfQuarter, endOfQuarter, isWithinInterval } from 'date-fns';
 import type { Interval } from 'date-fns';
 
-import { vehicles } from '@/lib/data';
+import { vehicles as initialVehicles, updateAllVehiclePositions } from '@/lib/data';
 import type { Vehicle, Mode, Region, Carrier } from '@/types';
 import { useUser } from '@/hooks/use-user';
 import { useToast } from '@/hooks/use-toast';
@@ -20,12 +20,15 @@ import { FilterBar } from '@/components/geo-visor/filter-bar';
 import { MapView } from '@/components/geo-visor/map-view';
 import { VehicleDetails } from './vehicle-details';
 
-import { Truck, Ship, Leaf, Globe, Bot, Send, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Truck, Ship, Leaf, Globe, Bot, Send, ChevronLeft, ChevronRight, Activity, Clock, Navigation } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Progress } from '@/components/ui/progress';
 import { GearsmapLogo } from '@/components/icons/gearsmap-logo';
 import { cn } from '@/lib/utils';
 
@@ -39,7 +42,20 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
   const { toast } = useToast();
   const [popoverOpen, setPopoverOpen] = React.useState(false);
   const [isSidebarOpen, setSidebarOpen] = React.useState(true);
+  const [vehicles, setVehicles] = useState<Vehicle[]>(initialVehicles);
+  const [isRealTimeActive, setIsRealTimeActive] = useState(true);
   const mapRef = useRef<MapRef>(null);
+
+  // Real-time vehicle position updates
+  useEffect(() => {
+    if (!isRealTimeActive) return;
+
+    const interval = setInterval(() => {
+      setVehicles(currentVehicles => updateAllVehiclePositions(currentVehicles));
+    }, 3000); // Update every 3 seconds
+
+    return () => clearInterval(interval);
+  }, [isRealTimeActive]);
 
   const form = useForm<z.infer<typeof searchSchema>>({
     resolver: zodResolver(searchSchema),
@@ -118,6 +134,33 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
 
   const totalVehicles = useMemo(() => filteredVehicles.length, [filteredVehicles]);
 
+  // Real-time statistics
+  const liveStats = useMemo(() => {
+    const inTransit = filteredVehicles.filter(v => v.status === 'In Transit').length;
+    const loading = filteredVehicles.filter(v => v.status === 'Loading').length;
+    const delayed = filteredVehicles.filter(v => v.status === 'Delayed').length;
+    const totalCapacity = filteredVehicles.reduce((acc, v) => acc + (v.capacity || 0), 0);
+    const totalLoad = filteredVehicles.reduce((acc, v) => acc + (v.currentLoad || 0), 0);
+    const utilizationRate = totalCapacity > 0 ? (totalLoad / totalCapacity) * 100 : 0;
+
+    return {
+      inTransit,
+      loading,
+      delayed,
+      utilizationRate: utilizationRate.toFixed(1)
+    };
+  }, [filteredVehicles]);
+
+  // Active routes by mode
+  const activeRoutes = useMemo(() => {
+    const routesByMode = {
+      sea: filteredVehicles.filter(v => v.mode === 'sea' && v.status === 'In Transit').length,
+      truck: filteredVehicles.filter(v => v.mode === 'truck' && v.status === 'In Transit').length,
+      rail: filteredVehicles.filter(v => v.mode === 'rail' && v.status === 'In Transit').length
+    };
+    return routesByMode;
+  }, [filteredVehicles]);
+
   const emissionsByMode = useMemo(() => {
     const modes: Mode[] = ['truck', 'rail', 'sea'];
     return modes.map(mode => ({
@@ -162,24 +205,100 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
           ) : (
             <div className="flex flex-col gap-6 p-4 overflow-y-auto h-full">
                 <div className="flex items-center justify-between gap-4">
-                    <h2 className="text-lg font-bold tracking-tight">
-                        Real Time
-                    </h2>
+                    <div className="flex items-center gap-2">
+                        <h2 className="text-lg font-bold tracking-tight">
+                            Real Time
+                        </h2>
+                        <div className="flex items-center gap-1">
+                            <div className={cn(
+                                "w-2 h-2 rounded-full",
+                                isRealTimeActive ? "bg-green-500" : "bg-gray-400"
+                            )} />
+                            <span className="text-xs text-muted-foreground">
+                                {isRealTimeActive ? 'LIVE' : 'PAUSED'}
+                            </span>
+                        </div>
+                    </div>
                     <div className="flex items-center space-x-2">
-                        <Select value={timeRange} onValueChange={(value) => setTimeRange(value as 'week' | 'month' | 'quarter')}>
-                            <SelectTrigger className="w-full sm:w-[180px]">
-                                <SelectValue placeholder="Select time range" />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="week">This Week</SelectItem>
-                                <SelectItem value="month">This Month</SelectItem>
-                                <SelectItem value="quarter">This Quarter</SelectItem>
-                            </SelectContent>
-                        </Select>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setIsRealTimeActive(!isRealTimeActive)}
+                        >
+                            {isRealTimeActive ? 'Pause' : 'Resume'}
+                        </Button>
                     </div>
                 </div>
                 
                 <FilterBar filters={filters} setFilters={setFilters} />
+
+                {/* Live Status Overview */}
+                <Card>
+                    <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-sm">
+                            <Activity className="h-4 w-4" />
+                            Live Status Overview
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <div className="grid grid-cols-3 gap-2 text-xs">
+                            <div className="text-center p-2 bg-green-50 dark:bg-green-950/20 rounded">
+                                <div className="font-bold text-green-700 dark:text-green-300">{liveStats.inTransit}</div>
+                                <div className="text-green-600 dark:text-green-400">In Transit</div>
+                            </div>
+                            <div className="text-center p-2 bg-blue-50 dark:bg-blue-950/20 rounded">
+                                <div className="font-bold text-blue-700 dark:text-blue-300">{liveStats.loading}</div>
+                                <div className="text-blue-600 dark:text-blue-400">Loading</div>
+                            </div>
+                            <div className="text-center p-2 bg-red-50 dark:bg-red-950/20 rounded">
+                                <div className="font-bold text-red-700 dark:text-red-300">{liveStats.delayed}</div>
+                                <div className="text-red-600 dark:text-red-400">Delayed</div>
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <div className="flex justify-between text-xs">
+                                <span>Fleet Utilization</span>
+                                <span className="font-medium">{liveStats.utilizationRate}%</span>
+                            </div>
+                            <Progress value={parseFloat(liveStats.utilizationRate)} className="h-2" />
+                        </div>
+                    </CardContent>
+                </Card>
+
+                {/* Active Routes by Mode */}
+                <Card>
+                    <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-sm">
+                            <Navigation className="h-4 w-4" />
+                            Active Routes
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <div className="space-y-2">
+                            <div className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2">
+                                    <Ship className="h-3 w-3 text-blue-500" />
+                                    <span>Sea Routes</span>
+                                </div>
+                                <Badge variant="secondary">{activeRoutes.sea}</Badge>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2">
+                                    <Truck className="h-3 w-3 text-green-500" />
+                                    <span>Land Routes</span>
+                                </div>
+                                <Badge variant="secondary">{activeRoutes.truck}</Badge>
+                            </div>
+                            <div className="flex items-center justify-between text-xs">
+                                <div className="flex items-center gap-2">
+                                    <Clock className="h-3 w-3 text-orange-500" />
+                                    <span>Rail Routes</span>
+                                </div>
+                                <Badge variant="secondary">{activeRoutes.rail}</Badge>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <StatsCard
@@ -224,6 +343,58 @@ export function DashboardClient({ mapboxToken }: { mapboxToken: string }) {
                         colors={['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))']}
                     />
                 )}
+
+                {/* Real-time Shipment Summary */}
+                <Card>
+                    <CardHeader className="pb-3">
+                        <CardTitle className="flex items-center gap-2 text-sm">
+                            <Activity className="h-4 w-4" />
+                            Real-time Shipment Summary
+                            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse ml-auto" />
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                        <div className="grid grid-cols-2 gap-4 text-xs">
+                            <div className="space-y-2">
+                                <div className="text-muted-foreground">Major Sea Routes</div>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between">
+                                        <span>Pacific Crossing</span>
+                                        <Badge variant="outline" className="text-xs">8 Active</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Atlantic Crossing</span>
+                                        <Badge variant="outline" className="text-xs">12 Active</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Asia-Europe</span>
+                                        <Badge variant="outline" className="text-xs">15 Active</Badge>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="text-muted-foreground">Land Corridors</div>
+                                <div className="space-y-1">
+                                    <div className="flex justify-between">
+                                        <span>US Continental</span>
+                                        <Badge variant="outline" className="text-xs">6 Active</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>European Network</span>
+                                        <Badge variant="outline" className="text-xs">9 Active</Badge>
+                                    </div>
+                                    <div className="flex justify-between">
+                                        <span>Silk Road</span>
+                                        <Badge variant="outline" className="text-xs">4 Active</Badge>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div className="pt-2 border-t text-xs text-center text-muted-foreground">
+                            Updates every 3 seconds • Last update: {new Date().toLocaleTimeString()}
+                        </div>
+                    </CardContent>
+                </Card>
                 
                 {/* Powered by footer */}
                 <div className="mt-auto pt-4 border-t">

@@ -66,7 +66,11 @@ export const MapView = React.forwardRef<MapRef, MapViewProps>(
               onVehicleClick(vehicle);
             }}
           >
-            <VehicleMarker mode={vehicle.mode} isSelected={selectedVehicle?.id === vehicle.id} />
+            <VehicleMarker 
+              mode={vehicle.mode} 
+              isSelected={selectedVehicle?.id === vehicle.id}
+              status={vehicle.status}
+            />
           </Marker>
         ))}
       </Map>

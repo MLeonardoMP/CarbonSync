@@ -26,4 +26,8 @@ export type Vehicle = {
   region: Region;
   loadFactor: number;
   costPerKm: number;
+  status?: string;
+  cargoType?: string;
+  capacity?: number;
+  currentLoad?: number;
 };
