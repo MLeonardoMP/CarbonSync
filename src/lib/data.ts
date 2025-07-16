@@ -97,6 +97,8 @@ const vehicleRoutes: Map<string, VehicleRoute> = new Map();
 // Enhanced vehicle generation with realistic routes
 const baseTime = new Date('2024-01-01T00:00:00Z').getTime();
 
+// Updated logic to ensure vehicles match their routes
+// Ensure fallback route selection if no routes match the mode criteria
 export const vehicles: Vehicle[] = Array.from({ length: 50 }, (_, i) => {
   const mode = modes[Math.floor(seededRandom() * modes.length)];
   const region = regions[Math.floor(seededRandom() * regions.length)];
@@ -106,7 +108,18 @@ export const vehicles: Vehicle[] = Array.from({ length: 50 }, (_, i) => {
   let specificFuelTypes: ('Diesel' | 'Electric' | 'Marine Gas Oil' | 'LNG')[];
 
   // Select appropriate route based on mode
-  let selectedRoute: RoutePoint[] = shippingRoutes[Object.keys(shippingRoutes)[Math.floor(seededRandom() * Object.keys(shippingRoutes).length)] as keyof typeof shippingRoutes];
+  let selectedRoute: RoutePoint[];
+  if (mode === 'sea') {
+    const seaRoutes = Object.keys(shippingRoutes).filter(route => route.includes('sea'));
+    selectedRoute = seaRoutes.length > 0
+      ? shippingRoutes[seaRoutes[Math.floor(seededRandom() * seaRoutes.length)] as keyof typeof shippingRoutes]
+      : shippingRoutes.transpacific; // Fallback to transpacific route
+  } else {
+    const landRoutes = Object.keys(shippingRoutes).filter(route => !route.includes('sea'));
+    selectedRoute = landRoutes.length > 0
+      ? shippingRoutes[landRoutes[Math.floor(seededRandom() * landRoutes.length)] as keyof typeof shippingRoutes]
+      : shippingRoutes.us_transcontinental; // Fallback to US transcontinental route
+  }
 
   const currentIndex = Math.floor(seededRandom() * selectedRoute.length);
   const currentPosition = selectedRoute[currentIndex];
